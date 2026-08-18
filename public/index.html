@@ -182,21 +182,44 @@
   .service-card:hover::after{width:100%;}
 
   /* PRICING */
-  .pricing{background:#fff;}
-  .price-groups{display:grid; grid-template-columns:1fr 1fr; gap:50px;}
+  .pricing{background:#fbf6ec; position:relative; overflow:hidden;}
+  .pricing::before{
+    content:''; position:absolute; top:-120px; right:-120px; width:420px; height:420px;
+    border-radius:50%; background:radial-gradient(circle, rgba(201,161,95,0.16), transparent 70%);
+    pointer-events:none;
+  }
+  .price-groups{display:grid; grid-template-columns:repeat(2, 1fr); gap:26px; position:relative;}
+  .price-group{
+    background:#fff; border:1px solid var(--line); border-radius:8px; padding:32px 34px;
+    box-shadow:0 20px 50px -30px rgba(52,9,15,0.25); transition:transform .3s ease, box-shadow .3s ease;
+    position:relative;
+  }
+  .price-group:hover{transform:translateY(-4px); box-shadow:0 30px 60px -25px rgba(52,9,15,0.3);}
   .price-group h3{
-    color:var(--bordeaux); font-size:1.25rem; margin-bottom:18px; padding-bottom:12px;
-    border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px;
+    color:var(--bordeaux); font-size:1.2rem; margin-bottom:20px; padding-bottom:16px;
+    border-bottom:1px solid var(--line); display:flex; align-items:center; gap:14px;
   }
-  .price-group h3 svg{width:20px; height:20px; color:var(--rose);}
+  .price-group h3 .icon-badge{
+    width:38px; height:38px; border-radius:50%; background:linear-gradient(150deg, var(--bordeaux), var(--bordeaux-deep));
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .price-group h3 .icon-badge svg{width:18px; height:18px; color:var(--gold-light);}
   .price-row{
-    display:flex; justify-content:space-between; align-items:baseline; padding:12px 0;
-    border-bottom:1px dashed rgba(74,20,32,0.12); gap:12px;
+    display:flex; justify-content:space-between; align-items:baseline; padding:13px 0;
+    border-bottom:1px solid rgba(74,20,32,0.07); gap:16px;
   }
-  .price-row .name{font-size:0.95rem; color:var(--ink);}
-  .price-row .name small{display:block; font-size:0.78rem; color:#8a7278; margin-top:2px;}
-  .price-row .val{font-family:'Playfair Display', serif; color:var(--bordeaux); font-weight:600; white-space:nowrap;}
-  .pricing-note{margin-top:34px; font-size:0.85rem; color:#8a7278; font-style:italic;}
+  .price-row:last-child{border-bottom:none; padding-bottom:0;}
+  .price-row .name{font-size:0.96rem; color:var(--ink); display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .price-row .name small{display:block; font-size:0.78rem; color:#a2898f; margin-top:2px; width:100%;}
+  .price-row .badge-popular{
+    font-size:0.62rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;
+    color:var(--bordeaux); background:var(--gold-light); padding:2px 8px; border-radius:20px;
+  }
+  .price-row .val{
+    font-family:'Playfair Display', serif; color:var(--bordeaux); font-weight:700; white-space:nowrap;
+    font-size:1.05rem;
+  }
+  .pricing-note{margin-top:30px; font-size:0.85rem; color:#8a7278; font-style:italic; position:relative;}
 
   /* ABOUT */
   .about{background:var(--bordeaux-deep); color:var(--cream); position:relative;}
@@ -218,7 +241,7 @@
   .about-list svg{width:18px; height:18px; color:var(--gold); flex-shrink:0;}
 
   /* GALLERY */
-  .gallery-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:2px; background:var(--bordeaux-deep);}
+  .gallery-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:3px; background:var(--bordeaux-deep);}
   .gallery-strip div{
     aspect-ratio:3/4; position:relative; overflow:hidden;
   }
@@ -596,30 +619,30 @@
     </div>
     <div class="price-groups">
       <div class="price-group">
-        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/></svg>Cabelo</h3>
+        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/></svg></span>Cabelo</h3>
         <div class="price-row"><span class="name">Corte feminino<small>Lavagem + corte + escova</small></span><span class="val">Desde 18€</span></div>
         <div class="price-row"><span class="name">Corte masculino</span><span class="val">Desde 12€</span></div>
         <div class="price-row"><span class="name">Coloração<small>Raiz ou cabelo completo</small></span><span class="val">Desde 35€</span></div>
-        <div class="price-row"><span class="name">Mechas / Balayage</span><span class="val">Desde 55€</span></div>
+        <div class="price-row"><span class="name">Mechas / Balayage <span class="badge-popular">Mais pedido</span></span><span class="val">Desde 55€</span></div>
         <div class="price-row"><span class="name">Tratamento capilar</span><span class="val">Desde 20€</span></div>
         <div class="price-row"><span class="name">Escova / Brushing</span><span class="val">Desde 14€</span></div>
       </div>
       <div class="price-group">
-        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Unhas</h3>
+        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Unhas</h3>
         <div class="price-row"><span class="name">Manicure clássica</span><span class="val">15€</span></div>
-        <div class="price-row"><span class="name">Manicure em gel</span><span class="val">22€</span></div>
+        <div class="price-row"><span class="name">Manicure em gel <span class="badge-popular">Mais pedido</span></span><span class="val">22€</span></div>
         <div class="price-row"><span class="name">Pedicure completa</span><span class="val">20€</span></div>
         <div class="price-row"><span class="name">Nail art<small>Por unha decorada</small></span><span class="val">Desde 2€</span></div>
         <div class="price-row"><span class="name">Reconstrução de unhas</span><span class="val">Desde 28€</span></div>
       </div>
       <div class="price-group">
-        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg>Estética Facial</h3>
+        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg></span>Estética Facial</h3>
         <div class="price-row"><span class="name">Limpeza de pele</span><span class="val">Desde 25€</span></div>
         <div class="price-row"><span class="name">Tratamento anti-idade</span><span class="val">Desde 35€</span></div>
         <div class="price-row"><span class="name">Massagem facial</span><span class="val">Desde 20€</span></div>
       </div>
       <div class="price-group">
-        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M4 6h16M4 18h16"/></svg>Sobrancelhas, Pestanas &amp; Depilação</h3>
+        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M4 6h16M4 18h16"/></svg></span>Sobrancelhas, Pestanas &amp; Depilação</h3>
         <div class="price-row"><span class="name">Design de sobrancelhas</span><span class="val">12€</span></div>
         <div class="price-row"><span class="name">Henna de sobrancelhas</span><span class="val">15€</span></div>
         <div class="price-row"><span class="name">Laminação de sobrancelhas</span><span class="val">20€</span></div>
@@ -655,6 +678,10 @@
   <div data-label="Nail Art"><img src="https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&w=600&q=70" alt="Manicure rosa em foco" loading="lazy"></div>
   <div data-label="Pedicure"><img src="https://images.unsplash.com/photo-1610992015762-45dca7fa3a85?auto=format&fit=crop&w=600&q=70" alt="Pedicure sobre toalha branca" loading="lazy"></div>
   <div data-label="O Espaço"><img src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=70" alt="Cadeiras de salão junto a um espelho grande" loading="lazy"></div>
+  <div data-label="Styling"><img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=600&q=70" alt="Secador de cabelo em mãos" loading="lazy"></div>
+  <div data-label="Corte de Precisão"><img src="https://images.unsplash.com/photo-1700760934268-8aa0ef52ce0a?auto=format&fit=crop&w=600&q=70" alt="Corte de cabelo com tesoura" loading="lazy"></div>
+  <div data-label="Escova"><img src="https://images.unsplash.com/photo-1734111719430-fe4a3973f8af?auto=format&fit=crop&w=600&q=70" alt="Escova a moldar cabelo loiro" loading="lazy"></div>
+  <div data-label="O Salão"><img src="https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?auto=format&fit=crop&w=600&q=70" alt="Interior moderno de salão de beleza" loading="lazy"></div>
 </div>
 
 <section class="location">
