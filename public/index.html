@@ -82,6 +82,14 @@
     font-size:0.82rem; text-transform:uppercase; letter-spacing:0.1em;
   }
   .icon-btn svg{width:19px; height:19px;}
+  .lang-toggle{
+    background:none; border:1px solid var(--gold); border-radius:20px; padding:5px 12px; cursor:pointer;
+    display:flex; align-items:center; gap:5px; font-size:0.76rem; font-weight:600; letter-spacing:0.04em;
+  }
+  header:not(.scrolled) .lang-toggle{border-color:rgba(247,240,230,0.4);}
+  .lang-opt{opacity:0.5; transition:.2s;}
+  .lang-opt.active{opacity:1; color:var(--gold);}
+  .lang-sep{opacity:0.3; font-size:0.7rem;}
   .burger{display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none;}
   .burger span{width:24px; height:2px; background:var(--cream); transition:.3s;}
 
@@ -387,20 +395,48 @@
 
   /* MODALS (login/signup/forgot) */
   .modal-overlay{
-    position:fixed; inset:0; background:rgba(36,16,18,0.6); backdrop-filter:blur(3px);
+    position:fixed; inset:0; background:rgba(36,16,18,0.65); backdrop-filter:blur(4px);
     z-index:400; display:none; align-items:center; justify-content:center; padding:20px;
   }
-  .modal-overlay.open{display:flex;}
+  .modal-overlay.open{display:flex; animation:fadeInOverlay .25s ease;}
+  @keyframes fadeInOverlay{from{opacity:0;} to{opacity:1;}}
   .modal-card{
-    background:#fff; width:420px; max-width:100%; border-radius:6px; padding:38px 36px;
-    box-shadow:0 40px 90px -20px rgba(0,0,0,0.4); position:relative; max-height:92vh; overflow-y:auto;
+    background:#fff; width:800px; max-width:100%; border-radius:10px;
+    box-shadow:0 50px 100px -20px rgba(0,0,0,0.5); position:relative; max-height:92vh; overflow:hidden;
+    display:flex; animation:modalPop .3s cubic-bezier(.2,.9,.3,1.2);
   }
+  @keyframes modalPop{from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:translateY(0) scale(1);}}
+  .modal-side{
+    width:280px; flex-shrink:0; position:relative; overflow:hidden; display:flex; flex-direction:column;
+    justify-content:flex-end; padding:34px 30px;
+    background:
+      linear-gradient(200deg, rgba(52,9,15,0.35), rgba(52,9,15,0.85)),
+      url('https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&w=600&q=70') center/cover;
+    color:var(--cream);
+  }
+  .modal-side::before{
+    content:''; position:absolute; inset:0;
+    background-image: repeating-linear-gradient(115deg, rgba(201,161,95,0.08) 0px, rgba(201,161,95,0.08) 1px, transparent 1px, transparent 60px);
+  }
+  .modal-side-brand{position:relative; display:flex; align-items:center; gap:8px; font-family:'Playfair Display', serif; font-weight:700; font-size:1.1rem; margin-bottom:auto;}
+  .modal-side-brand svg{width:22px; height:22px;}
+  .modal-side blockquote{position:relative; font-family:'Playfair Display', serif; font-style:italic; font-size:1.15rem; line-height:1.5; color:var(--gold-light);}
+  .modal-side cite{position:relative; display:block; margin-top:14px; font-size:0.78rem; font-style:normal; letter-spacing:0.08em; text-transform:uppercase; color:rgba(247,240,230,0.7);}
+  .modal-main{flex:1; padding:38px 40px; overflow-y:auto; min-width:0;}
   .modal-close{
-    position:absolute; top:16px; right:16px; background:none; border:none; cursor:pointer;
-    color:#8a7278; font-size:1.2rem;
+    position:absolute; top:16px; right:16px; background:rgba(0,0,0,0.06); border:none; cursor:pointer;
+    color:#6b5259; font-size:1rem; width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; transition:.2s; z-index:2;
   }
+  .modal-close:hover{background:rgba(0,0,0,0.12); color:var(--bordeaux);}
+  .modal-tabs{display:flex; gap:6px; background:#f3ece0; border-radius:30px; padding:4px; margin-bottom:26px;}
+  .modal-tab{
+    flex:1; text-align:center; padding:10px; border-radius:26px; border:none; background:none; cursor:pointer;
+    font-family:'Jost'; font-size:0.84rem; font-weight:500; color:#8a7278; transition:.2s;
+  }
+  .modal-tab.active{background:var(--bordeaux); color:var(--cream); box-shadow:0 6px 16px rgba(52,9,15,0.25);}
   .modal-card h3{color:var(--bordeaux); font-size:1.5rem; margin-bottom:6px;}
-  .modal-card > p{font-size:0.87rem; color:#6b5259; margin-bottom:22px;}
+  .modal-card > p, .modal-main > p{font-size:0.87rem; color:#6b5259; margin-bottom:22px;}
   .modal-links{display:flex; justify-content:space-between; margin-top:16px; font-size:0.82rem;}
   .modal-links a{color:var(--rose); text-decoration:underline; cursor:pointer;}
   .modal-msg{font-size:0.85rem; padding:12px 14px; border-radius:3px; margin-bottom:18px; display:none;}
@@ -408,6 +444,13 @@
   .modal-msg.error{background:#fbeaea; color:#a4322a; border:1px solid #f0c6c2;}
   .modal-msg.success{background:#e9f4ec; color:#2f6b48; border:1px solid #c3e2cd;}
   .demo-hint{font-size:0.78rem; color:#a2898f; margin-top:16px; background:#fbf6ec; border:1px solid var(--line); padding:10px 12px; border-radius:3px;}
+  .input-icon{position:relative;}
+  .input-icon svg{position:absolute; left:14px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:#a2898f; pointer-events:none;}
+  .input-icon input{padding-left:40px !important;}
+  @media (max-width: 640px){
+    .modal-side{display:none;}
+    .modal-main{padding:32px 26px;}
+  }
 
   /* ACCOUNT DRAWER */
   .drawer-overlay{
@@ -568,17 +611,20 @@
   </div>
   <nav>
     <div class="nav-links" id="navLinks">
-      <a href="#servicos">Serviços</a>
-      <a href="#precos">Preços</a>
-      <a href="#sobre">Sobre</a>
-      <a href="#galeria">Galeria</a>
-      <a href="#marcacoes">Marcações</a>
-      <a href="#contacto">Contacto</a>
-      <a href="#marcacoes" class="nav-cta">Marcar</a>
+      <a href="#servicos" data-i18n="nav_services">Serviços</a>
+      <a href="#precos" data-i18n="nav_prices">Preços</a>
+      <a href="#sobre" data-i18n="nav_about">Sobre</a>
+      <a href="#galeria" data-i18n="nav_gallery">Galeria</a>
+      <a href="#marcacoes" data-i18n="nav_booking">Marcações</a>
+      <a href="#contacto" data-i18n="nav_contact">Contacto</a>
+      <a href="#marcacoes" class="nav-cta" data-i18n="nav_book_cta">Marcar</a>
     </div>
+    <button class="lang-toggle" id="langToggle" aria-label="Mudar idioma / Change language">
+      <span class="lang-opt active" data-lang="pt">PT</span><span class="lang-sep">/</span><span class="lang-opt" data-lang="en">EN</span>
+    </button>
     <button class="icon-btn" id="accountBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
-      <span id="accountLabel">Entrar</span>
+      <span id="accountLabel" data-i18n="nav_login">Entrar</span>
     </button>
     <button class="burger" id="burger" aria-label="Abrir menu"><span></span><span></span><span></span></button>
   </nav>
@@ -591,30 +637,31 @@
     <g opacity="0.6"><path d="M100 5 L100 195 M5 100 L195 100" stroke-dasharray="2 6"/></g>
   </svg>
   <div class="container hero-content">
-    <div class="eyebrow">Salão de Beleza · Benfica, Lisboa</div>
-    <h1>Beleza com <em>alma</em>,<br>ao virar da esquina.</h1>
-    <p class="lead">Cabelo, unhas e estética num só espaço em Benfica. Cuidado personalizado, produtos de qualidade e o à-vontade de quem já é da casa.</p>
+    <div class="eyebrow" data-i18n="hero_eyebrow">Salão de Beleza · Benfica, Lisboa</div>
+    <h1 data-i18n-html="hero_title">Beleza com <em>alma</em>,<br>ao virar da esquina.</h1>
+    <p class="lead" data-i18n="hero_lead">Cabelo, unhas e estética num só espaço em Benfica. Cuidado personalizado, produtos de qualidade e o à-vontade de quem já é da casa.</p>
     <div class="hero-actions">
-      <a href="#marcacoes" class="btn btn-primary">Marcar Hora</a>
-      <a href="#servicos" class="btn btn-ghost">Ver Serviços</a>
+      <a href="#marcacoes" class="btn btn-primary" data-i18n="hero_cta_book">Marcar Hora</a>
+      <a href="#servicos" class="btn btn-ghost" data-i18n="hero_cta_services">Ver Serviços</a>
     </div>
   </div>
   <div class="hero-stats">
     <div class="container">
-      <div class="stat"><b>4.9</b><span>Avaliação Google</span></div>
-      <div class="stat"><b>+12</b><span>Anos em Benfica</span></div>
-      <div class="stat"><b>6</b><span>Especialistas</span></div>
-      <div class="stat"><b>3.500+</b><span>Clientes fidelizados</span></div>
+      <div class="stat"><b>4.9</b><span data-i18n="stat_rating">Avaliação Google</span></div>
+      <div class="stat"><b>+12</b><span data-i18n="stat_years">Anos em Benfica</span></div>
+      <div class="stat"><b>6</b><span data-i18n="stat_specialists">Especialistas</span></div>
+      <div class="stat"><b>3.500+</b><span data-i18n="stat_clients">Clientes fidelizados</span></div>
     </div>
   </div>
 </section>
 
+
 <section class="services" id="servicos">
   <div class="container">
     <div class="section-head" data-reveal>
-      <div class="eyebrow">O que fazemos</div>
-      <h2>Serviços à medida</h2>
-      <p>Da manutenção mensal ao momento especial — escolha o que precisa e marque em menos de um minuto.</p>
+      <div class="eyebrow" data-i18n="services_eyebrow">O que fazemos</div>
+      <h2 data-i18n="services_title">Serviços à medida</h2>
+      <p data-i18n="services_sub">Da manutenção mensal ao momento especial — escolha o que precisa e marque em menos de um minuto.</p>
     </div>
   </div>
   <div class="service-grid" data-reveal="stagger">
@@ -622,54 +669,54 @@
       <div class="thumb"><img src="https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?auto=format&fit=crop&w=700&q=70" alt="Cliente a cortar o cabelo num salão" loading="lazy"></div>
       <div class="body">
         <span class="service-num">01</span>
-        <h3>Cabelo</h3>
-        <p>Corte, cor, tratamento capilar e escova. Diagnóstico incluído em todas as primeiras visitas.</p>
-        <span class="service-price">Desde 18€</span>
+        <h3 data-i18n="svc1_title">Cabelo</h3>
+        <p data-i18n="svc1_desc">Corte, cor, tratamento capilar e escova. Diagnóstico incluído em todas as primeiras visitas.</p>
+        <span class="service-price" data-i18n="svc1_price">Desde 18€</span>
       </div>
     </div>
     <div class="service-card">
       <div class="thumb"><img src="https://images.unsplash.com/photo-1612887390768-fb02affea7a6?auto=format&fit=crop&w=700&q=70" alt="Manicure com verniz rosa" loading="lazy"></div>
       <div class="body">
         <span class="service-num">02</span>
-        <h3>Unhas</h3>
-        <p>Manicure e pedicure clássica ou em gel, nail art e reconstrução de unhas.</p>
-        <span class="service-price">Desde 15€</span>
+        <h3 data-i18n="svc2_title">Unhas</h3>
+        <p data-i18n="svc2_desc">Manicure e pedicure clássica ou em gel, nail art e reconstrução de unhas.</p>
+        <span class="service-price" data-i18n="svc2_price">Desde 15€</span>
       </div>
     </div>
     <div class="service-card">
       <div class="thumb"><img src="https://images.unsplash.com/photo-1571290274554-6a2eaa771e5f?auto=format&fit=crop&w=700&q=70" alt="Detalhe de unhas cuidadas" loading="lazy"></div>
       <div class="body">
         <span class="service-num">03</span>
-        <h3>Estética Facial</h3>
-        <p>Limpeza de pele, tratamentos anti-idade e rotinas personalizadas para cada tipo de pele.</p>
-        <span class="service-price">Desde 25€</span>
+        <h3 data-i18n="svc3_title">Estética Facial</h3>
+        <p data-i18n="svc3_desc">Limpeza de pele, tratamentos anti-idade e rotinas personalizadas para cada tipo de pele.</p>
+        <span class="service-price" data-i18n="svc3_price">Desde 25€</span>
       </div>
     </div>
     <div class="service-card">
       <div class="thumb"><img src="https://images.unsplash.com/photo-1629397685944-7073f5589754?auto=format&fit=crop&w=700&q=70" alt="Estilista a pentear cabelo em salão" loading="lazy"></div>
       <div class="body">
         <span class="service-num">04</span>
-        <h3>Sobrancelhas &amp; Pestanas</h3>
-        <p>Design de sobrancelhas, henna, laminação e extensão de pestanas.</p>
-        <span class="service-price">Desde 12€</span>
+        <h3 data-i18n="svc4_title">Sobrancelhas &amp; Pestanas</h3>
+        <p data-i18n="svc4_desc">Design de sobrancelhas, henna, laminação e extensão de pestanas.</p>
+        <span class="service-price" data-i18n="svc4_price">Desde 12€</span>
       </div>
     </div>
     <div class="service-card">
       <div class="thumb"><img src="https://images.unsplash.com/photo-1736434518489-0eb84070017f?auto=format&fit=crop&w=700&q=70" alt="Mão com manicure segurando uma flor" loading="lazy"></div>
       <div class="body">
         <span class="service-num">05</span>
-        <h3>Depilação</h3>
-        <p>Cera quente e fria para todas as zonas, num ambiente discreto e confortável.</p>
-        <span class="service-price">Desde 8€</span>
+        <h3 data-i18n="svc5_title">Depilação</h3>
+        <p data-i18n="svc5_desc">Cera quente e fria para todas as zonas, num ambiente discreto e confortável.</p>
+        <span class="service-price" data-i18n="svc5_price">Desde 8€</span>
       </div>
     </div>
     <div class="service-card">
       <div class="thumb"><img src="https://images.unsplash.com/photo-1754799670312-8e7da8e40ad7?auto=format&fit=crop&w=700&q=70" alt="Unhas decoradas em tons dourados" loading="lazy"></div>
       <div class="body">
         <span class="service-num">06</span>
-        <h3>Noiva &amp; Eventos</h3>
-        <p>Pacotes completos de cabelo e maquilhagem para o seu dia especial.</p>
-        <span class="service-price">Sob consulta</span>
+        <h3 data-i18n="svc6_title">Noiva &amp; Eventos</h3>
+        <p data-i18n="svc6_desc">Pacotes completos de cabelo e maquilhagem para o seu dia especial.</p>
+        <span class="service-price" data-i18n="svc6_price">Sob consulta</span>
       </div>
     </div>
   </div>
@@ -678,45 +725,45 @@
 <section class="pricing" id="precos">
   <div class="container">
     <div class="section-head" data-reveal>
-      <div class="eyebrow">Tabela de preços</div>
-      <h2>Preços claros, sem surpresas</h2>
-      <p>Valores de referência — o preço final depende do comprimento/estado do cabelo ou da complexidade do trabalho, e é sempre confirmado antes do serviço.</p>
+      <div class="eyebrow" data-i18n="pricing_eyebrow">Tabela de preços</div>
+      <h2 data-i18n="pricing_title">Preços claros, sem surpresas</h2>
+      <p data-i18n="pricing_sub">Valores de referência — o preço final depende do comprimento/estado do cabelo ou da complexidade do trabalho, e é sempre confirmado antes do serviço.</p>
     </div>
     <div class="price-groups" data-reveal="stagger">
       <div class="price-group">
-        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/></svg></span>Cabelo</h3>
-        <div class="price-row"><span class="name">Corte feminino<small>Lavagem + corte + escova</small></span><span class="val">Desde 18€</span></div>
-        <div class="price-row"><span class="name">Corte masculino</span><span class="val">Desde 12€</span></div>
-        <div class="price-row"><span class="name">Coloração<small>Raiz ou cabelo completo</small></span><span class="val">Desde 35€</span></div>
-        <div class="price-row"><span class="name">Mechas / Balayage <span class="badge-popular">Mais pedido</span></span><span class="val">Desde 55€</span></div>
-        <div class="price-row"><span class="name">Tratamento capilar</span><span class="val">Desde 20€</span></div>
-        <div class="price-row"><span class="name">Escova / Brushing</span><span class="val">Desde 14€</span></div>
+        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/></svg></span><span data-i18n="svc1_title">Cabelo</span></h3>
+        <div class="price-row"><span class="name" data-i18n="pr_corte_fem">Corte feminino<small data-i18n="pr_corte_fem_s">Lavagem + corte + escova</small></span><span class="val">Desde 18€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_corte_masc">Corte masculino</span><span class="val">Desde 12€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_color">Coloração<small data-i18n="pr_color_s">Raiz ou cabelo completo</small></span><span class="val">Desde 35€</span></div>
+        <div class="price-row"><span class="name"><span data-i18n="pr_balayage">Mechas / Balayage</span> <span class="badge-popular" data-i18n="badge_popular">Mais pedido</span></span><span class="val">Desde 55€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_treat_hair">Tratamento capilar</span><span class="val">Desde 20€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_brushing">Escova / Brushing</span><span class="val">Desde 14€</span></div>
       </div>
       <div class="price-group">
-        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Unhas</h3>
-        <div class="price-row"><span class="name">Manicure clássica</span><span class="val">15€</span></div>
-        <div class="price-row"><span class="name">Manicure em gel <span class="badge-popular">Mais pedido</span></span><span class="val">22€</span></div>
-        <div class="price-row"><span class="name">Pedicure completa</span><span class="val">20€</span></div>
-        <div class="price-row"><span class="name">Nail art<small>Por unha decorada</small></span><span class="val">Desde 2€</span></div>
-        <div class="price-row"><span class="name">Reconstrução de unhas</span><span class="val">Desde 28€</span></div>
+        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span data-i18n="svc2_title">Unhas</span></h3>
+        <div class="price-row"><span class="name" data-i18n="pr_manicure_classic">Manicure clássica</span><span class="val">15€</span></div>
+        <div class="price-row"><span class="name"><span data-i18n="pr_manicure_gel">Manicure em gel</span> <span class="badge-popular" data-i18n="badge_popular">Mais pedido</span></span><span class="val">22€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_pedicure">Pedicure completa</span><span class="val">20€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_nailart">Nail art<small data-i18n="pr_nailart_s">Por unha decorada</small></span><span class="val">Desde 2€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_reconstruction">Reconstrução de unhas</span><span class="val">Desde 28€</span></div>
       </div>
       <div class="price-group">
-        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg></span>Estética Facial</h3>
-        <div class="price-row"><span class="name">Limpeza de pele</span><span class="val">Desde 25€</span></div>
-        <div class="price-row"><span class="name">Tratamento anti-idade</span><span class="val">Desde 35€</span></div>
-        <div class="price-row"><span class="name">Massagem facial</span><span class="val">Desde 20€</span></div>
+        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg></span><span data-i18n="svc3_title">Estética Facial</span></h3>
+        <div class="price-row"><span class="name" data-i18n="pr_cleanse">Limpeza de pele</span><span class="val">Desde 25€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_antiaging">Tratamento anti-idade</span><span class="val">Desde 35€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_facial_massage">Massagem facial</span><span class="val">Desde 20€</span></div>
       </div>
       <div class="price-group">
-        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M4 6h16M4 18h16"/></svg></span>Sobrancelhas, Pestanas &amp; Depilação</h3>
-        <div class="price-row"><span class="name">Design de sobrancelhas</span><span class="val">12€</span></div>
-        <div class="price-row"><span class="name">Henna de sobrancelhas</span><span class="val">15€</span></div>
-        <div class="price-row"><span class="name">Laminação de sobrancelhas</span><span class="val">20€</span></div>
-        <div class="price-row"><span class="name">Extensão de pestanas</span><span class="val">Desde 30€</span></div>
-        <div class="price-row"><span class="name">Depilação (perna completa)</span><span class="val">Desde 15€</span></div>
-        <div class="price-row"><span class="name">Depilação (buço/sobrancelha)</span><span class="val">8€</span></div>
+        <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M4 6h16M4 18h16"/></svg></span><span data-i18n="price_group4_title">Sobrancelhas, Pestanas &amp; Depilação</span></h3>
+        <div class="price-row"><span class="name" data-i18n="pr_eyebrow_design">Design de sobrancelhas</span><span class="val">12€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_henna">Henna de sobrancelhas</span><span class="val">15€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_lamination">Laminação de sobrancelhas</span><span class="val">20€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_lashes">Extensão de pestanas</span><span class="val">Desde 30€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_wax_leg">Depilação (perna completa)</span><span class="val">Desde 15€</span></div>
+        <div class="price-row"><span class="name" data-i18n="pr_wax_face">Depilação (buço/sobrancelha)</span><span class="val">8€</span></div>
       </div>
     </div>
-    <p class="pricing-note">* Pacotes de Noiva &amp; Eventos são sempre orçamentados à parte, após uma consulta gratuita.</p>
+    <p class="pricing-note" data-i18n="pricing_note">* Pacotes de Noiva &amp; Eventos são sempre orçamentados à parte, após uma consulta gratuita.</p>
   </div>
 </section>
 
@@ -728,40 +775,40 @@
       <img src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=900&q=70" alt="Interior de um salão de beleza com cadeiras e espelhos" loading="lazy">
     </div>
     <div class="about-text" data-reveal>
-      <div class="eyebrow">A nossa história</div>
-      <h2>Um salão de bairro, com padrão de cidade.</h2>
-      <p>A Maria Bonita nasceu em Benfica com um propósito simples: tratar cada cliente como se fosse a única do dia. Mais de uma década depois, continuamos fiéis a esse compromisso — agora com uma equipa de especialistas certificados e produtos profissionais de topo.</p>
+      <div class="eyebrow" data-i18n="about_eyebrow">A nossa história</div>
+      <h2 data-i18n="about_title">Um salão de bairro, com padrão de cidade.</h2>
+      <p data-i18n="about_p">A Maria Bonita nasceu em Benfica com um propósito simples: tratar cada cliente como se fosse a única do dia. Mais de uma década depois, continuamos fiéis a esse compromisso — agora com uma equipa de especialistas certificados e produtos profissionais de topo.</p>
       <div class="about-list">
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Equipa certificada em cada área</div>
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Produtos profissionais de topo</div>
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Marcação online, sem esperas</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> <span data-i18n="about_li1">Equipa certificada em cada área</span></div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> <span data-i18n="about_li2">Produtos profissionais de topo</span></div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> <span data-i18n="about_li3">Marcação online, sem esperas</span></div>
       </div>
     </div>
   </div>
 </section>
 
 <div class="gallery-strip" id="galeria" data-reveal="stagger">
-  <div data-label="Corte & Cor"><img src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=600&q=70" alt="Secagem e styling de cabelo" loading="lazy"></div>
-  <div data-label="Nail Art"><img src="https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&w=600&q=70" alt="Manicure rosa em foco" loading="lazy"></div>
-  <div data-label="Pedicure"><img src="https://images.unsplash.com/photo-1610992015762-45dca7fa3a85?auto=format&fit=crop&w=600&q=70" alt="Pedicure sobre toalha branca" loading="lazy"></div>
-  <div data-label="O Espaço"><img src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=70" alt="Cadeiras de salão junto a um espelho grande" loading="lazy"></div>
-  <div data-label="Styling"><img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=600&q=70" alt="Secador de cabelo em mãos" loading="lazy"></div>
-  <div data-label="Corte de Precisão"><img src="https://images.unsplash.com/photo-1700760934268-8aa0ef52ce0a?auto=format&fit=crop&w=600&q=70" alt="Corte de cabelo com tesoura" loading="lazy"></div>
-  <div data-label="Escova"><img src="https://images.unsplash.com/photo-1734111719430-fe4a3973f8af?auto=format&fit=crop&w=600&q=70" alt="Escova a moldar cabelo loiro" loading="lazy"></div>
-  <div data-label="O Salão"><img src="https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?auto=format&fit=crop&w=600&q=70" alt="Interior moderno de salão de beleza" loading="lazy"></div>
+  <div data-label="Corte & Cor" data-i18n-label="gal_1"><img src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=600&q=70" alt="Secagem e styling de cabelo" loading="lazy"></div>
+  <div data-label="Nail Art" data-i18n-label="gal_2"><img src="https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&w=600&q=70" alt="Manicure rosa em foco" loading="lazy"></div>
+  <div data-label="Pedicure" data-i18n-label="gal_3"><img src="https://images.unsplash.com/photo-1610992015762-45dca7fa3a85?auto=format&fit=crop&w=600&q=70" alt="Pedicure sobre toalha branca" loading="lazy"></div>
+  <div data-label="O Espaço" data-i18n-label="gal_4"><img src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=70" alt="Cadeiras de salão junto a um espelho grande" loading="lazy"></div>
+  <div data-label="Styling" data-i18n-label="gal_5"><img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=600&q=70" alt="Secador de cabelo em mãos" loading="lazy"></div>
+  <div data-label="Corte de Precisão" data-i18n-label="gal_6"><img src="https://images.unsplash.com/photo-1700760934268-8aa0ef52ce0a?auto=format&fit=crop&w=600&q=70" alt="Corte de cabelo com tesoura" loading="lazy"></div>
+  <div data-label="Escova" data-i18n-label="gal_7"><img src="https://images.unsplash.com/photo-1734111719430-fe4a3973f8af?auto=format&fit=crop&w=600&q=70" alt="Escova a moldar cabelo loiro" loading="lazy"></div>
+  <div data-label="O Salão" data-i18n-label="gal_8"><img src="https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?auto=format&fit=crop&w=600&q=70" alt="Interior moderno de salão de beleza" loading="lazy"></div>
 </div>
 
 <section class="location">
   <div class="container">
     <div class="section-head" data-reveal>
-      <div class="eyebrow">Onde estamos</div>
-      <h2>Encontre-nos em Benfica</h2>
-      <p>A morada exata e o mapa vão ser adicionados aqui em breve.</p>
+      <div class="eyebrow" data-i18n="location_eyebrow">Onde estamos</div>
+      <h2 data-i18n="location_title">Encontre-nos em Benfica</h2>
+      <p data-i18n="location_sub">A morada exata e o mapa vão ser adicionados aqui em breve.</p>
     </div>
     <div class="map-placeholder">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
-      <h4>Mapa em breve</h4>
-      <p>Assim que confirmarmos a morada exata do salão, esta secção passa a mostrar o Google Maps embutido com a localização e as direções.</p>
+      <h4 data-i18n="map_title">Mapa em breve</h4>
+      <p data-i18n="map_desc">Assim que confirmarmos a morada exata do salão, esta secção passa a mostrar o Google Maps embutido com a localização e as direções.</p>
     </div>
   </div>
 </section>
@@ -769,48 +816,48 @@
 <section class="booking" id="marcacoes">
   <div class="container">
     <div class="booking-info" data-reveal>
-      <div class="eyebrow" style="color:var(--rose);">Marcações</div>
-      <h2>Reserve o seu momento</h2>
-      <p>Escolha o serviço, o dia e a hora — entramos em contacto para confirmar. Também pode marcar diretamente com a nossa assistente virtual.</p>
+      <div class="eyebrow" style="color:var(--rose);" data-i18n="booking_eyebrow">Marcações</div>
+      <h2 data-i18n="booking_title">Reserve o seu momento</h2>
+      <p data-i18n="booking_lead">Escolha o serviço, o dia e a hora — entramos em contacto para confirmar. Também pode marcar diretamente com a nossa assistente virtual.</p>
       <div class="info-row">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
-        <div><h4>Morada</h4><span>Benfica, Lisboa (morada exata brevemente)</span></div>
+        <div><h4 data-i18n="info_address_label">Morada</h4><span data-i18n="info_address_value">Benfica, Lisboa (morada exata brevemente)</span></div>
       </div>
       <div class="info-row">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-        <div><h4>Horário</h4><span>Terça a Sábado · 9h30 – 19h30</span></div>
+        <div><h4 data-i18n="info_hours_label">Horário</h4><span data-i18n="info_hours_value">Terça a Sábado · 9h30 – 19h30</span></div>
       </div>
       <div class="info-row">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.3a16 16 0 0 0 6 6l1.5-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2Z"/></svg>
-        <div><h4>Telefone</h4><span>91 234 56 78</span></div>
+        <div><h4 data-i18n="info_phone_label">Telefone</h4><span>91 234 56 78</span></div>
       </div>
     </div>
 
     <div class="booking-form" data-reveal>
       <div id="formStep">
-        <h3>Marcação em 3 passos</h3>
-        <p>Resposta de confirmação em poucas horas, dentro do nosso horário.</p>
+        <h3 data-i18n="booking_form_title">Marcação em 3 passos</h3>
+        <p data-i18n="booking_form_sub">Resposta de confirmação em poucas horas, dentro do nosso horário.</p>
         <div class="logged-banner" id="loggedBanner" style="display:none;">
-          <span>A marcar como <strong id="loggedName"></strong></span>
-          <button type="button" id="loggedSwitch">não sou eu</button>
+          <span data-i18n="logged_as">A marcar como <strong id="loggedName"></strong></span>
+          <button type="button" id="loggedSwitch" data-i18n="logged_switch">não sou eu</button>
         </div>
         <form id="bookingForm" novalidate>
 
-          <div class="step-label"><span class="step-num">1</span>Escolha o serviço</div>
+          <div class="step-label"><span class="step-num">1</span><span data-i18n="step1_label">Escolha o serviço</span></div>
           <div class="field" id="f-service">
             <div class="service-picker" id="servicePicker">
               <button type="button" class="svc-chip" data-value="Cabelo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/></svg>Cabelo</button>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/></svg><span data-i18n="svc1_title">Cabelo</span></button>
               <button type="button" class="svc-chip" data-value="Unhas">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Unhas</button>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span data-i18n="svc2_title">Unhas</span></button>
               <button type="button" class="svc-chip" data-value="Estética Facial">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>Estética Facial</button>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg><span data-i18n="svc3_title">Estética Facial</span></button>
               <button type="button" class="svc-chip" data-value="Sobrancelhas & Pestanas">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h16M4 6h16M4 18h16"/></svg>Sobrancelhas</button>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h16M4 6h16M4 18h16"/></svg><span data-i18n="chip_eyebrows">Sobrancelhas</span></button>
               <button type="button" class="svc-chip" data-value="Depilação">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3v4M18 3v4M4 11h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-6Z"/></svg>Depilação</button>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3v4M18 3v4M4 11h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-6Z"/></svg><span data-i18n="svc5_title">Depilação</span></button>
               <button type="button" class="svc-chip" data-value="Noiva & Eventos">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5Z"/></svg>Noiva & Eventos</button>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5Z"/></svg><span data-i18n="svc6_title">Noiva & Eventos</span></button>
             </div>
             <select id="fservice" class="visually-hidden" tabindex="-1" aria-hidden="true">
               <option value="">Escolha um serviço</option>
@@ -821,47 +868,47 @@
               <option>Depilação</option>
               <option>Noiva & Eventos</option>
             </select>
-            <small class="err">Escolha um serviço.</small>
+            <small class="err" data-i18n="err_service">Escolha um serviço.</small>
           </div>
 
-          <div class="step-label"><span class="step-num">2</span>Escolha o dia e a hora</div>
+          <div class="step-label"><span class="step-num">2</span><span data-i18n="step2_label">Escolha o dia e a hora</span></div>
           <div class="field" id="f-date">
-            <label for="fdate">Data preferida</label>
+            <label for="fdate" data-i18n="label_date">Data preferida</label>
             <input id="fdate" type="date">
-            <small class="err">Escolha uma data a partir de hoje.</small>
+            <small class="err" data-i18n="err_date">Escolha uma data a partir de hoje.</small>
           </div>
           <div class="field" id="f-time">
-            <label>Hora preferida</label>
+            <label data-i18n="label_time">Hora preferida</label>
             <div class="time-picker" id="timePicker"></div>
             <input id="ftime" type="hidden">
-            <small class="err">Escolha uma hora entre as 9h30 e as 19h30.</small>
+            <small class="err" data-i18n="err_time">Escolha uma hora entre as 9h30 e as 19h30.</small>
           </div>
 
-          <div class="step-label"><span class="step-num">3</span>Os seus dados</div>
+          <div class="step-label"><span class="step-num">3</span><span data-i18n="step3_label">Os seus dados</span></div>
           <div class="form-row">
             <div class="field" id="f-name">
-              <label for="fname">Nome</label>
-              <input id="fname" type="text" placeholder="O seu nome">
-              <small class="err">Indique o seu nome.</small>
+              <label for="fname" data-i18n="label_name">Nome</label>
+              <input id="fname" type="text" data-i18n-placeholder="ph_name" placeholder="O seu nome">
+              <small class="err" data-i18n="err_name">Indique o seu nome.</small>
             </div>
             <div class="field" id="f-phone">
-              <label for="fphone">Telemóvel</label>
+              <label for="fphone" data-i18n="label_phone">Telemóvel</label>
               <input id="fphone" type="tel" placeholder="9xx xxx xxx">
-              <small class="err">Indique um telemóvel válido (9 dígitos).</small>
+              <small class="err" data-i18n="err_phone">Indique um telemóvel válido (9 dígitos).</small>
             </div>
           </div>
           <div class="field">
-            <label for="fnotes">Notas (opcional)</label>
-            <textarea id="fnotes" placeholder="Alguma preferência ou pedido especial?"></textarea>
+            <label for="fnotes" data-i18n="label_notes">Notas (opcional)</label>
+            <textarea id="fnotes" data-i18n-placeholder="ph_notes" placeholder="Alguma preferência ou pedido especial?"></textarea>
           </div>
-          <button type="submit" class="submit-btn">Confirmar Pedido de Marcação</button>
+          <button type="submit" class="submit-btn" data-i18n="submit_booking">Confirmar Pedido de Marcação</button>
         </form>
       </div>
       <div class="form-confirm" id="formConfirm">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-        <h4>Pedido recebido!</h4>
+        <h4 data-i18n="confirm_received">Pedido recebido!</h4>
         <p id="confirmText">Obrigado. Vamos confirmar a sua marcação por telefone brevemente.</p>
-        <button class="btn btn-ghost" style="margin-top:20px; border-color:var(--bordeaux); color:var(--bordeaux);" id="newBookingBtn">Fazer outra marcação</button>
+        <button class="btn btn-ghost" style="margin-top:20px; border-color:var(--bordeaux); color:var(--bordeaux);" id="newBookingBtn" data-i18n="new_booking_btn">Fazer outra marcação</button>
       </div>
     </div>
   </div>
@@ -870,16 +917,16 @@
 <section class="testimonials">
   <div class="container">
     <div class="section-head" style="margin-bottom:44px;" data-reveal>
-      <div class="eyebrow" style="color:var(--gold-light);">Clientes</div>
-      <h2 style="color:var(--cream);">O que dizem de nós</h2>
+      <div class="eyebrow" style="color:var(--gold-light);" data-i18n="testi_eyebrow">Clientes</div>
+      <h2 style="color:var(--cream);" data-i18n="testi_title">O que dizem de nós</h2>
     </div>
   </div>
   <div class="container">
     <div class="t-track" data-reveal="stagger">
-      <div class="t-card"><div class="t-top"><div class="t-avatar">SM</div><div class="t-stars">★★★★★</div></div><p>"Sou cliente há 6 anos e nunca saí de lá insatisfeita. Ambiente acolhedor e equipa atenciosa."</p><div class="t-name">Sofia M.</div></div>
-      <div class="t-card"><div class="t-top"><div class="t-avatar">CR</div><div class="t-stars">★★★★★</div></div><p>"O melhor serviço de unhas de Benfica, sem dúvida. Marquei pelo site e foi super rápido."</p><div class="t-name">Carla R.</div></div>
-      <div class="t-card"><div class="t-top"><div class="t-avatar">BA</div><div class="t-stars">★★★★★</div></div><p>"Fiz o cabelo para o meu casamento e foi exatamente o que sonhei. Recomendo de olhos fechados."</p><div class="t-name">Beatriz A.</div></div>
-      <div class="t-card"><div class="t-top"><div class="t-avatar">IP</div><div class="t-stars">★★★★★</div></div><p>"Profissionais, pontuais e com preços justos. É o meu salão de referência."</p><div class="t-name">Inês P.</div></div>
+      <div class="t-card"><div class="t-top"><div class="t-avatar">SM</div><div class="t-stars">★★★★★</div></div><p data-i18n="t1">"Sou cliente há 6 anos e nunca saí de lá insatisfeita. Ambiente acolhedor e equipa atenciosa."</p><div class="t-name">Sofia M.</div></div>
+      <div class="t-card"><div class="t-top"><div class="t-avatar">CR</div><div class="t-stars">★★★★★</div></div><p data-i18n="t2">"O melhor serviço de unhas de Benfica, sem dúvida. Marquei pelo site e foi super rápido."</p><div class="t-name">Carla R.</div></div>
+      <div class="t-card"><div class="t-top"><div class="t-avatar">BA</div><div class="t-stars">★★★★★</div></div><p data-i18n="t3">"Fiz o cabelo para o meu casamento e foi exatamente o que sonhei. Recomendo de olhos fechados."</p><div class="t-name">Beatriz A.</div></div>
+      <div class="t-card"><div class="t-top"><div class="t-avatar">IP</div><div class="t-stars">★★★★★</div></div><p data-i18n="t4">"Profissionais, pontuais e com preços justos. É o meu salão de referência."</p><div class="t-name">Inês P.</div></div>
     </div>
   </div>
 </section>
@@ -889,117 +936,149 @@
     <div class="footer-grid">
       <div>
         <div class="footer-brand">Maria Bonita</div>
-        <p>Salão de beleza em Benfica dedicado ao cabelo, unhas e estética — cuidado próximo, resultado profissional.</p>
+        <p data-i18n="footer_desc">Salão de beleza em Benfica dedicado ao cabelo, unhas e estética — cuidado próximo, resultado profissional.</p>
       </div>
       <div>
-        <h5>Navegação</h5>
+        <h5 data-i18n="footer_nav_title">Navegação</h5>
         <ul>
-          <li><a href="#servicos">Serviços</a></li>
-          <li><a href="#precos">Preços</a></li>
-          <li><a href="#sobre">Sobre</a></li>
-          <li><a href="#marcacoes">Marcações</a></li>
+          <li><a href="#servicos" data-i18n="nav_services">Serviços</a></li>
+          <li><a href="#precos" data-i18n="nav_prices">Preços</a></li>
+          <li><a href="#sobre" data-i18n="nav_about">Sobre</a></li>
+          <li><a href="#marcacoes" data-i18n="nav_booking">Marcações</a></li>
         </ul>
       </div>
       <div>
-        <h5>Contactos</h5>
+        <h5 data-i18n="footer_contacts_title">Contactos</h5>
         <ul>
-          <li>Benfica, Lisboa</li>
+          <li data-i18n="footer_city">Benfica, Lisboa</li>
           <li>91 234 56 78</li>
           <li>ola@mariabonita.pt</li>
         </ul>
       </div>
       <div>
-        <h5>Horário</h5>
+        <h5 data-i18n="footer_hours_title">Horário</h5>
         <ul>
-          <li>Ter – Sex: 9h30–19h30</li>
-          <li>Sáb: 9h30–18h00</li>
-          <li>Dom / Seg: Encerrado</li>
+          <li data-i18n="footer_hours1">Ter – Sex: 9h30–19h30</li>
+          <li data-i18n="footer_hours2">Sáb: 9h30–18h00</li>
+          <li data-i18n="footer_hours3">Dom / Seg: Encerrado</li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Maria Bonita. Todos os direitos reservados.</span>
-      <span>Site por NorteStudio</span>
+      <span data-i18n="footer_rights">© 2026 Maria Bonita. Todos os direitos reservados.</span>
+      <span data-i18n="footer_by">Site por NorteStudio</span>
     </div>
   </div>
 </footer>
 
-<!-- LOGIN MODAL -->
-<div class="modal-overlay" id="loginOverlay">
+<!-- LOGIN / SIGNUP MODAL -->
+<div class="modal-overlay" id="authOverlay">
   <div class="modal-card">
     <button class="modal-close" data-close-modal>✕</button>
-    <h3>Entrar na sua conta</h3>
-    <p>Aceda ao histórico das suas marcações.</p>
-    <div class="modal-msg" id="loginMsg"></div>
-    <form id="loginForm">
-      <div class="field">
-        <label for="loginEmail">Email</label>
-        <input id="loginEmail" type="email" placeholder="o.seu@email.com" required>
+    <div class="modal-side">
+      <div class="modal-side-brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/><path d="M12 14v8M8 22h8"/></svg>
+        Maria Bonita
       </div>
-      <div class="field">
-        <label for="loginPassword">Password</label>
-        <input id="loginPassword" type="password" placeholder="••••••••" required>
-      </div>
-      <button type="submit" class="submit-btn">Entrar</button>
-    </form>
-    <div class="modal-links">
-      <a data-open-modal="forgot">Esqueceu-se da password?</a>
-      <a data-open-modal="signup">Criar conta</a>
+      <blockquote data-i18n="modal_quote">"O melhor serviço de Benfica — a equipa trata de nós como se fôssemos família."</blockquote>
+      <cite data-i18n="modal_quote_cite">— Cliente Maria Bonita</cite>
     </div>
-    <div class="demo-hint">Conta de demonstração: <strong>demo@mariabonita.pt</strong> / <strong>demo123</strong></div>
-  </div>
-</div>
+    <div class="modal-main">
+      <div class="modal-tabs">
+        <button type="button" class="modal-tab active" id="tabLoginBtn" data-i18n="tab_login">Entrar</button>
+        <button type="button" class="modal-tab" id="tabSignupBtn" data-i18n="tab_signup">Criar conta</button>
+      </div>
 
-<!-- SIGNUP MODAL -->
-<div class="modal-overlay" id="signupOverlay">
-  <div class="modal-card">
-    <button class="modal-close" data-close-modal>✕</button>
-    <h3>Criar conta</h3>
-    <p>Assim consegue gerir e cancelar as suas marcações a qualquer momento.</p>
-    <div class="modal-msg" id="signupMsg"></div>
-    <form id="signupForm">
-      <div class="field">
-        <label for="signupName">Nome</label>
-        <input id="signupName" type="text" placeholder="O seu nome" required>
+      <div id="loginPanel">
+        <h3 data-i18n="login_title">Bem-vinda de volta</h3>
+        <p data-i18n="login_sub">Aceda ao histórico das suas marcações.</p>
+        <div class="modal-msg" id="loginMsg"></div>
+        <form id="loginForm">
+          <div class="field">
+            <label for="loginEmail" data-i18n="label_email">Email</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+              <input id="loginEmail" type="email" data-i18n-placeholder="ph_email" placeholder="o.seu@email.com" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="loginPassword" data-i18n="label_password">Password</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              <input id="loginPassword" type="password" placeholder="••••••••" required>
+            </div>
+          </div>
+          <button type="submit" class="submit-btn" data-i18n="btn_login">Entrar</button>
+        </form>
+        <div class="modal-links">
+          <a data-open-modal="forgot" data-i18n="link_forgot">Esqueceu-se da password?</a>
+          <span></span>
+        </div>
+        <div class="demo-hint" data-i18n="demo_hint">Conta de demonstração: <strong>demo@mariabonita.pt</strong> / <strong>demo123</strong></div>
       </div>
-      <div class="field">
-        <label for="signupEmail">Email</label>
-        <input id="signupEmail" type="email" placeholder="o.seu@email.com" required>
+
+      <div id="signupPanel" style="display:none;">
+        <h3 data-i18n="signup_title">Criar conta</h3>
+        <p data-i18n="signup_sub">Assim consegue gerir e cancelar as suas marcações a qualquer momento.</p>
+        <div class="modal-msg" id="signupMsg"></div>
+        <form id="signupForm">
+          <div class="field">
+            <label for="signupName" data-i18n="label_name">Nome</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+              <input id="signupName" type="text" data-i18n-placeholder="ph_name" placeholder="O seu nome" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="signupEmail" data-i18n="label_email">Email</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+              <input id="signupEmail" type="email" data-i18n-placeholder="ph_email" placeholder="o.seu@email.com" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="signupPhone" data-i18n="label_phone">Telemóvel</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.3a16 16 0 0 0 6 6l1.5-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2Z"/></svg>
+              <input id="signupPhone" type="tel" placeholder="9xx xxx xxx" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="signupPassword" data-i18n="label_password">Password</label>
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              <input id="signupPassword" type="password" data-i18n-placeholder="ph_min6" placeholder="Mínimo 6 caracteres" required>
+            </div>
+          </div>
+          <button type="submit" class="submit-btn" data-i18n="btn_signup">Criar Conta</button>
+        </form>
       </div>
-      <div class="field">
-        <label for="signupPhone">Telemóvel</label>
-        <input id="signupPhone" type="tel" placeholder="9xx xxx xxx" required>
-      </div>
-      <div class="field">
-        <label for="signupPassword">Password</label>
-        <input id="signupPassword" type="password" placeholder="Mínimo 6 caracteres" required>
-      </div>
-      <button type="submit" class="submit-btn">Criar Conta</button>
-    </form>
-    <div class="modal-links">
-      <span></span>
-      <a data-open-modal="login">Já tenho conta</a>
     </div>
   </div>
 </div>
 
 <!-- FORGOT PASSWORD MODAL -->
 <div class="modal-overlay" id="forgotOverlay">
-  <div class="modal-card">
+  <div class="modal-card" style="width:460px;">
     <button class="modal-close" data-close-modal>✕</button>
-    <h3>Recuperar password</h3>
-    <p>Indique o email da sua conta. Vamos enviar-lhe um email a sério com uma hiperligação para escolher uma password nova.</p>
-    <div class="modal-msg" id="forgotMsg"></div>
-    <form id="forgotForm">
-      <div class="field">
-        <label for="forgotEmail">Email</label>
-        <input id="forgotEmail" type="email" placeholder="o.seu@email.com" required>
+    <div class="modal-main" style="padding:38px 36px;">
+      <h3 data-i18n="forgot_title">Recuperar password</h3>
+      <p data-i18n="forgot_sub">Indique o email da sua conta. Vamos enviar-lhe um email a sério com uma hiperligação para escolher uma password nova.</p>
+      <div class="modal-msg" id="forgotMsg"></div>
+      <form id="forgotForm">
+        <div class="field">
+          <label for="forgotEmail" data-i18n="label_email">Email</label>
+          <div class="input-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+            <input id="forgotEmail" type="email" data-i18n-placeholder="ph_email" placeholder="o.seu@email.com" required>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn" data-i18n="btn_send_recovery">Enviar pedido por email</button>
+      </form>
+      <div class="modal-links">
+        <a data-open-modal="login" data-i18n="link_back_login">Voltar a entrar</a>
+        <span></span>
       </div>
-      <button type="submit" class="submit-btn">Enviar pedido por email</button>
-    </form>
-    <div class="modal-links">
-      <a data-open-modal="login">Voltar a entrar</a>
-      <span></span>
     </div>
   </div>
 </div>
@@ -1009,17 +1088,17 @@
 <div class="account-drawer" id="accountDrawer">
   <div class="drawer-head">
     <button class="drawer-close" id="drawerClose">✕</button>
-    <h3 id="drawerName">A minha conta</h3>
+    <h3 id="drawerName" data-i18n="drawer_default_title">A minha conta</h3>
     <span id="drawerEmail"></span>
   </div>
   <div class="drawer-body" id="drawerBody">
-    <h4>Próximas marcações</h4>
+    <h4 data-i18n="drawer_upcoming">Próximas marcações</h4>
     <div id="upcomingList"></div>
-    <h4>Histórico</h4>
+    <h4 data-i18n="drawer_history">Histórico</h4>
     <div id="pastList"></div>
   </div>
   <div class="drawer-foot">
-    <button class="logout-btn" id="logoutBtn">Terminar sessão</button>
+    <button class="logout-btn" id="logoutBtn" data-i18n="drawer_logout">Terminar sessão</button>
   </div>
 </div>
 
@@ -1031,23 +1110,23 @@
   <div class="chat-head">
     <div class="dot"></div>
     <div>
-      <h4>Assistente Maria Bonita</h4>
-      <span>Normalmente responde em segundos</span>
+      <h4 data-i18n="chat_title">Assistente Maria Bonita</h4>
+      <span data-i18n="chat_subtitle">Normalmente responde em segundos</span>
     </div>
     <button class="chat-close" id="chatClose" aria-label="Fechar">✕</button>
   </div>
   <div class="chat-body" id="chatBody">
-    <div class="msg bot">Olá! 👋 Sou a assistente virtual da Maria Bonita. Pergunte-me sobre horários, preços, serviços, marcações, cancelamentos, pagamentos ou qualquer outra dúvida sobre o salão.</div>
+    <div class="msg bot" id="chatGreeting" data-i18n="chat_greeting">Olá! 👋 Sou a assistente virtual da Maria Bonita. Pergunte-me sobre horários, preços, serviços, marcações, cancelamentos, pagamentos ou qualquer outra dúvida sobre o salão.</div>
   </div>
   <div class="chat-suggestions" id="chatSuggestions">
-    <div class="chip" data-q="horario">Horário</div>
-    <div class="chip" data-q="precos">Preços</div>
-    <div class="chip" data-q="marcar">Marcar</div>
-    <div class="chip" data-q="cancelar">Cancelar</div>
-    <div class="chip" data-q="pagamento">Pagamentos</div>
+    <div class="chip" data-q="horario" data-i18n="chip_hours">Horário</div>
+    <div class="chip" data-q="precos" data-i18n="nav_prices">Preços</div>
+    <div class="chip" data-q="marcar" data-i18n="chip_book">Marcar</div>
+    <div class="chip" data-q="cancelar" data-i18n="chip_cancel">Cancelar</div>
+    <div class="chip" data-q="pagamento" data-i18n="chip_payment">Pagamentos</div>
   </div>
   <div class="chat-input">
-    <input type="text" id="chatInput" placeholder="Escreva a sua pergunta...">
+    <input type="text" id="chatInput" data-i18n-placeholder="chat_ph" placeholder="Escreva a sua pergunta...">
     <button class="chat-send" id="chatSend" aria-label="Enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
   </div>
 </div>
@@ -1062,6 +1141,243 @@ const API_BASE = '';
 // não ter de fazer login sempre que abre o site.
 let authToken = localStorage.getItem('mb_token') || null;
 let currentUserData = null; // { id, name, email, phone } vindo da API
+
+/* ============ TRADUÇÃO PT / EN ============ */
+let currentLang = localStorage.getItem('mb_lang') || 'pt';
+
+const T = {
+  pt: {
+    nav_services:'Serviços', nav_prices:'Preços', nav_about:'Sobre', nav_gallery:'Galeria',
+    nav_booking:'Marcações', nav_contact:'Contacto', nav_book_cta:'Marcar', nav_login:'Entrar',
+    hero_eyebrow:'Salão de Beleza · Benfica, Lisboa',
+    hero_title:'Beleza com <em>alma</em>,<br>ao virar da esquina.',
+    hero_lead:'Cabelo, unhas e estética num só espaço em Benfica. Cuidado personalizado, produtos de qualidade e o à-vontade de quem já é da casa.',
+    hero_cta_book:'Marcar Hora', hero_cta_services:'Ver Serviços',
+    stat_rating:'Avaliação Google', stat_years:'Anos em Benfica', stat_specialists:'Especialistas', stat_clients:'Clientes fidelizados',
+    services_eyebrow:'O que fazemos', services_title:'Serviços à medida',
+    services_sub:'Da manutenção mensal ao momento especial — escolha o que precisa e marque em menos de um minuto.',
+    svc1_title:'Cabelo', svc1_desc:'Corte, cor, tratamento capilar e escova. Diagnóstico incluído em todas as primeiras visitas.', svc1_price:'Desde 18€',
+    svc2_title:'Unhas', svc2_desc:'Manicure e pedicure clássica ou em gel, nail art e reconstrução de unhas.', svc2_price:'Desde 15€',
+    svc3_title:'Estética Facial', svc3_desc:'Limpeza de pele, tratamentos anti-idade e rotinas personalizadas para cada tipo de pele.', svc3_price:'Desde 25€',
+    svc4_title:'Sobrancelhas &amp; Pestanas', svc4_desc:'Design de sobrancelhas, henna, laminação e extensão de pestanas.', svc4_price:'Desde 12€',
+    svc5_title:'Depilação', svc5_desc:'Cera quente e fria para todas as zonas, num ambiente discreto e confortável.', svc5_price:'Desde 8€',
+    svc6_title:'Noiva &amp; Eventos', svc6_desc:'Pacotes completos de cabelo e maquilhagem para o seu dia especial.', svc6_price:'Sob consulta',
+    chip_eyebrows:'Sobrancelhas',
+    pricing_eyebrow:'Tabela de preços', pricing_title:'Preços claros, sem surpresas',
+    pricing_sub:'Valores de referência — o preço final depende do comprimento/estado do cabelo ou da complexidade do trabalho, e é sempre confirmado antes do serviço.',
+    price_group4_title:'Sobrancelhas, Pestanas &amp; Depilação',
+    badge_popular:'Mais pedido',
+    pr_corte_fem:'Corte feminino', pr_corte_fem_s:'Lavagem + corte + escova',
+    pr_corte_masc:'Corte masculino',
+    pr_color:'Coloração', pr_color_s:'Raiz ou cabelo completo',
+    pr_balayage:'Mechas / Balayage',
+    pr_treat_hair:'Tratamento capilar', pr_brushing:'Escova / Brushing',
+    pr_manicure_classic:'Manicure clássica', pr_manicure_gel:'Manicure em gel',
+    pr_pedicure:'Pedicure completa', pr_nailart:'Nail art', pr_nailart_s:'Por unha decorada',
+    pr_reconstruction:'Reconstrução de unhas', pr_cleanse:'Limpeza de pele', pr_antiaging:'Tratamento anti-idade',
+    pr_facial_massage:'Massagem facial', pr_eyebrow_design:'Design de sobrancelhas', pr_henna:'Henna de sobrancelhas',
+    pr_lamination:'Laminação de sobrancelhas', pr_lashes:'Extensão de pestanas',
+    pr_wax_leg:'Depilação (perna completa)', pr_wax_face:'Depilação (buço/sobrancelha)',
+    pricing_note:'* Pacotes de Noiva &amp; Eventos são sempre orçamentados à parte, após uma consulta gratuita.',
+    about_eyebrow:'A nossa história', about_title:'Um salão de bairro, com padrão de cidade.',
+    about_p:'A Maria Bonita nasceu em Benfica com um propósito simples: tratar cada cliente como se fosse a única do dia. Mais de uma década depois, continuamos fiéis a esse compromisso — agora com uma equipa de especialistas certificados e produtos profissionais de topo.',
+    about_li1:'Equipa certificada em cada área', about_li2:'Produtos profissionais de topo', about_li3:'Marcação online, sem esperas',
+    gal_1:'Corte & Cor', gal_2:'Nail Art', gal_3:'Pedicure', gal_4:'O Espaço', gal_5:'Styling', gal_6:'Corte de Precisão', gal_7:'Escova', gal_8:'O Salão',
+    location_eyebrow:'Onde estamos', location_title:'Encontre-nos em Benfica', location_sub:'A morada exata e o mapa vão ser adicionados aqui em breve.',
+    map_title:'Mapa em breve', map_desc:'Assim que confirmarmos a morada exata do salão, esta secção passa a mostrar o Google Maps embutido com a localização e as direções.',
+    booking_eyebrow:'Marcações', booking_title:'Reserve o seu momento',
+    booking_lead:'Escolha o serviço, o dia e a hora — entramos em contacto para confirmar. Também pode marcar diretamente com a nossa assistente virtual.',
+    info_address_label:'Morada', info_address_value:'Benfica, Lisboa (morada exata brevemente)',
+    info_hours_label:'Horário', info_hours_value:'Terça a Sábado · 9h30 – 19h30', info_phone_label:'Telefone',
+    booking_form_title:'Marcação em 3 passos', booking_form_sub:'Resposta de confirmação em poucas horas, dentro do nosso horário.',
+    logged_as:'A marcar como <strong id="loggedName"></strong>', logged_switch:'não sou eu',
+    step1_label:'Escolha o serviço', step2_label:'Escolha o dia e a hora', step3_label:'Os seus dados',
+    err_service:'Escolha um serviço.', label_date:'Data preferida', err_date:'Escolha uma data a partir de hoje.',
+    label_time:'Hora preferida', err_time:'Escolha uma hora entre as 9h30 e as 19h30.',
+    label_name:'Nome', err_name:'Indique o seu nome.', label_phone:'Telemóvel', err_phone:'Indique um telemóvel válido (9 dígitos).',
+    label_notes:'Notas (opcional)', ph_notes:'Alguma preferência ou pedido especial?', ph_name:'O seu nome',
+    submit_booking:'Confirmar Pedido de Marcação', submit_booking_sending:'A enviar...',
+    confirm_received:'Pedido recebido!', new_booking_btn:'Fazer outra marcação',
+    testi_eyebrow:'Clientes', testi_title:'O que dizem de nós',
+    t1:'"Sou cliente há 6 anos e nunca saí de lá insatisfeita. Ambiente acolhedor e equipa atenciosa."',
+    t2:'"O melhor serviço de unhas de Benfica, sem dúvida. Marquei pelo site e foi super rápido."',
+    t3:'"Fiz o cabelo para o meu casamento e foi exatamente o que sonhei. Recomendo de olhos fechados."',
+    t4:'"Profissionais, pontuais e com preços justos. É o meu salão de referência."',
+    footer_desc:'Salão de beleza em Benfica dedicado ao cabelo, unhas e estética — cuidado próximo, resultado profissional.',
+    footer_nav_title:'Navegação', footer_contacts_title:'Contactos', footer_city:'Benfica, Lisboa',
+    footer_hours_title:'Horário', footer_hours1:'Ter – Sex: 9h30–19h30', footer_hours2:'Sáb: 9h30–18h00', footer_hours3:'Dom / Seg: Encerrado',
+    footer_rights:'© 2026 Maria Bonita. Todos os direitos reservados.', footer_by:'Site por NorteStudio',
+    modal_quote:'"O melhor serviço de Benfica — a equipa trata de nós como se fôssemos família."', modal_quote_cite:'— Cliente Maria Bonita',
+    tab_login:'Entrar', tab_signup:'Criar conta',
+    login_title:'Bem-vinda de volta', login_sub:'Aceda ao histórico das suas marcações.',
+    label_email:'Email', label_password:'Password', btn_login:'Entrar', link_forgot:'Esqueceu-se da password?',
+    demo_hint:'Conta de demonstração: <strong>demo@mariabonita.pt</strong> / <strong>demo123</strong>',
+    signup_title:'Criar conta', signup_sub:'Assim consegue gerir e cancelar as suas marcações a qualquer momento.',
+    btn_signup:'Criar Conta', ph_email:'o.seu@email.com', ph_min6:'Mínimo 6 caracteres',
+    forgot_title:'Recuperar password', forgot_sub:'Indique o email da sua conta. Vamos enviar-lhe um email a sério com uma hiperligação para escolher uma password nova.',
+    btn_send_recovery:'Enviar pedido por email', link_back_login:'Voltar a entrar',
+    drawer_default_title:'A minha conta', drawer_upcoming:'Próximas marcações', drawer_history:'Histórico', drawer_logout:'Terminar sessão',
+    drawer_loading:'A carregar...', drawer_load_error:'Não foi possível carregar as marcações.',
+    drawer_empty_upcoming:'Sem marcações futuras. ', drawer_empty_upcoming_link:'Marcar agora',
+    drawer_empty_history:'Ainda sem histórico.', cancel_btn:'Cancelar marcação', cancel_btn_loading:'A cancelar...',
+    cancel_confirm:'Tem a certeza que quer cancelar esta marcação?', cancel_error:'Não foi possível cancelar a marcação.',
+    status_confirmada:'Confirmada', status_concluida:'Concluída', status_cancelada:'Cancelada',
+    chat_title:'Assistente Maria Bonita', chat_subtitle:'Normalmente responde em segundos',
+    chat_greeting:'Olá! 👋 Sou a assistente virtual da Maria Bonita. Pergunte-me sobre horários, preços, serviços, marcações, cancelamentos, pagamentos ou qualquer outra dúvida sobre o salão.',
+    chip_hours:'Horário', chip_book:'Marcar', chip_cancel:'Cancelar', chip_payment:'Pagamentos', chat_ph:'Escreva a sua pergunta...',
+    confirm_msg_account:'Obrigado, {name}! A sua marcação para "{service}" em {date} às {time} ficou registada. Já pode acompanhá-la na sua conta.',
+    confirm_msg_guest:'Obrigado, {name}! Recebemos o pedido para "{service}" em {date} às {time}. Vamos confirmar por telefone brevemente. Crie uma conta para poder acompanhar e cancelar esta marcação online.',
+    err_generic:'Ocorreu um erro. Tente novamente.', err_login:'Email ou password incorretos.',
+    err_booking_send:'Não foi possível enviar a marcação. Tente novamente.',
+  },
+  en: {
+    nav_services:'Services', nav_prices:'Prices', nav_about:'About', nav_gallery:'Gallery',
+    nav_booking:'Booking', nav_contact:'Contact', nav_book_cta:'Book Now', nav_login:'Log In',
+    hero_eyebrow:'Beauty Salon · Benfica, Lisbon',
+    hero_title:'Beauty with <em>soul</em>,<br>just around the corner.',
+    hero_lead:'Hair, nails and skincare all in one place in Benfica. Personalised care, quality products, and the comfort of feeling right at home.',
+    hero_cta_book:'Book Now', hero_cta_services:'View Services',
+    stat_rating:'Google Rating', stat_years:'Years in Benfica', stat_specialists:'Specialists', stat_clients:'Loyal Clients',
+    services_eyebrow:'What We Do', services_title:'Services Tailored to You',
+    services_sub:'From monthly upkeep to that special moment — pick what you need and book in under a minute.',
+    svc1_title:'Hair', svc1_desc:'Cut, colour, hair treatment and blow-dry. Consultation included on every first visit.', svc1_price:'From €18',
+    svc2_title:'Nails', svc2_desc:'Classic or gel manicure and pedicure, nail art and nail reconstruction.', svc2_price:'From €15',
+    svc3_title:'Facial Skincare', svc3_desc:'Skin cleansing, anti-ageing treatments and routines tailored to every skin type.', svc3_price:'From €25',
+    svc4_title:'Brows &amp; Lashes', svc4_desc:'Brow shaping, henna, lamination and lash extensions.', svc4_price:'From €12',
+    svc5_title:'Waxing', svc5_desc:'Hot and cold wax for every area, in a discreet and comfortable setting.', svc5_price:'From €8',
+    svc6_title:'Bridal &amp; Events', svc6_desc:'Complete hair and makeup packages for your special day.', svc6_price:'On request',
+    chip_eyebrows:'Brows',
+    pricing_eyebrow:'Price List', pricing_title:'Clear pricing, no surprises',
+    pricing_sub:'Reference prices — the final price depends on hair length/condition or job complexity, and is always confirmed before the service.',
+    price_group4_title:'Brows, Lashes &amp; Waxing',
+    badge_popular:'Most requested',
+    pr_corte_fem:'Women\'s haircut', pr_corte_fem_s:'Wash + cut + blow-dry',
+    pr_corte_masc:'Men\'s haircut',
+    pr_color:'Colour', pr_color_s:'Roots or full head',
+    pr_balayage:'Highlights / Balayage',
+    pr_treat_hair:'Hair treatment', pr_brushing:'Blow-dry',
+    pr_manicure_classic:'Classic manicure', pr_manicure_gel:'Gel manicure',
+    pr_pedicure:'Full pedicure', pr_nailart:'Nail art', pr_nailart_s:'Per decorated nail',
+    pr_reconstruction:'Nail reconstruction', pr_cleanse:'Skin cleansing', pr_antiaging:'Anti-ageing treatment',
+    pr_facial_massage:'Facial massage', pr_eyebrow_design:'Brow shaping', pr_henna:'Brow henna',
+    pr_lamination:'Brow lamination', pr_lashes:'Lash extensions',
+    pr_wax_leg:'Waxing (full leg)', pr_wax_face:'Waxing (lip/brow)',
+    pricing_note:'* Bridal &amp; Event packages are always quoted separately, after a free consultation.',
+    about_eyebrow:'Our Story', about_title:'A neighbourhood salon, with a city standard.',
+    about_p:'Maria Bonita was born in Benfica with a simple purpose: treat every client as if she were the only one that day. Over a decade later, we remain true to that commitment — now with a team of certified specialists and top-tier professional products.',
+    about_li1:'Certified team in every area', about_li2:'Top-tier professional products', about_li3:'Online booking, no waiting',
+    gal_1:'Cut & Colour', gal_2:'Nail Art', gal_3:'Pedicure', gal_4:'The Space', gal_5:'Styling', gal_6:'Precision Cut', gal_7:'Blow-dry', gal_8:'The Salon',
+    location_eyebrow:'Find Us', location_title:'Find us in Benfica', location_sub:'The exact address and map will be added here soon.',
+    map_title:'Map coming soon', map_desc:'As soon as we confirm the salon\'s exact address, this section will show an embedded Google Map with the location and directions.',
+    booking_eyebrow:'Booking', booking_title:'Reserve your moment',
+    booking_lead:'Choose the service, day and time — we\'ll get in touch to confirm. You can also book directly with our virtual assistant.',
+    info_address_label:'Address', info_address_value:'Benfica, Lisbon (exact address coming soon)',
+    info_hours_label:'Hours', info_hours_value:'Tuesday to Saturday · 9:30am – 7:30pm', info_phone_label:'Phone',
+    booking_form_title:'Booking in 3 steps', booking_form_sub:'Confirmation reply within a few hours, during our opening times.',
+    logged_as:'Booking as <strong id="loggedName"></strong>', logged_switch:'not me',
+    step1_label:'Choose the service', step2_label:'Choose the day and time', step3_label:'Your details',
+    err_service:'Choose a service.', label_date:'Preferred date', err_date:'Choose a date from today onward.',
+    label_time:'Preferred time', err_time:'Choose a time between 9:30am and 7:30pm.',
+    label_name:'Name', err_name:'Please enter your name.', label_phone:'Phone', err_phone:'Enter a valid phone number (9 digits).',
+    label_notes:'Notes (optional)', ph_notes:'Any preference or special request?', ph_name:'Your name',
+    submit_booking:'Confirm Booking Request', submit_booking_sending:'Sending...',
+    confirm_received:'Request received!', new_booking_btn:'Make another booking',
+    testi_eyebrow:'Clients', testi_title:'What people say about us',
+    t1:'"I\'ve been a client for 6 years and never left unhappy. Welcoming atmosphere and attentive team."',
+    t2:'"Hands down the best nail service in Benfica. Booked through the site and it was super quick."',
+    t3:'"Got my hair done for my wedding and it was exactly what I dreamed of. Recommend with my eyes closed."',
+    t4:'"Professional, punctual and fair prices. It\'s my go-to salon."',
+    footer_desc:'Beauty salon in Benfica dedicated to hair, nails and skincare — personal care, professional results.',
+    footer_nav_title:'Navigation', footer_contacts_title:'Contact', footer_city:'Benfica, Lisbon',
+    footer_hours_title:'Hours', footer_hours1:'Tue – Fri: 9:30am–7:30pm', footer_hours2:'Sat: 9:30am–6pm', footer_hours3:'Sun / Mon: Closed',
+    footer_rights:'© 2026 Maria Bonita. All rights reserved.', footer_by:'Website by NorteStudio',
+    modal_quote:'"The best service in Benfica — the team treats us like family."', modal_quote_cite:'— Maria Bonita client',
+    tab_login:'Log In', tab_signup:'Sign Up',
+    login_title:'Welcome back', login_sub:'Access your booking history.',
+    label_email:'Email', label_password:'Password', btn_login:'Log In', link_forgot:'Forgot your password?',
+    demo_hint:'Demo account: <strong>demo@mariabonita.pt</strong> / <strong>demo123</strong>',
+    signup_title:'Create Account', signup_sub:'This lets you manage and cancel your bookings anytime.',
+    btn_signup:'Create Account', ph_email:'your@email.com', ph_min6:'At least 6 characters',
+    forgot_title:'Reset password', forgot_sub:'Enter your account email. We\'ll send you a real email with a link to choose a new password.',
+    btn_send_recovery:'Send recovery email', link_back_login:'Back to login',
+    drawer_default_title:'My Account', drawer_upcoming:'Upcoming Bookings', drawer_history:'History', drawer_logout:'Log Out',
+    drawer_loading:'Loading...', drawer_load_error:'Could not load your bookings.',
+    drawer_empty_upcoming:'No upcoming bookings. ', drawer_empty_upcoming_link:'Book now',
+    drawer_empty_history:'No history yet.', cancel_btn:'Cancel booking', cancel_btn_loading:'Cancelling...',
+    cancel_confirm:'Are you sure you want to cancel this booking?', cancel_error:'Could not cancel the booking.',
+    status_confirmada:'Confirmed', status_concluida:'Completed', status_cancelada:'Cancelled',
+    chat_title:'Maria Bonita Assistant', chat_subtitle:'Usually replies within seconds',
+    chat_greeting:'Hi! 👋 I\'m the Maria Bonita virtual assistant. Ask me about hours, prices, services, bookings, cancellations, payments or anything else about the salon.',
+    chip_hours:'Hours', chip_book:'Book', chip_cancel:'Cancel', chip_payment:'Payments', chat_ph:'Type your question...',
+    confirm_msg_account:'Thank you, {name}! Your booking for "{service}" on {date} at {time} has been registered. You can now track it in your account.',
+    confirm_msg_guest:'Thank you, {name}! We received your request for "{service}" on {date} at {time}. We\'ll confirm by phone shortly. Create an account to track and cancel this booking online.',
+    err_generic:'Something went wrong. Please try again.', err_login:'Incorrect email or password.',
+    err_booking_send:'Could not send the booking. Please try again.',
+  }
+};
+
+function tr(key){ return (T[currentLang] && T[currentLang][key]) || (T.pt[key]) || key; }
+
+// O servidor responde sempre em português (é a língua "canónica" da API).
+// Quando o site está em inglês, traduzimos as mensagens conhecidas do lado do cliente.
+const serverMsgEn = {
+  'Sessão em falta. Inicie sessão.': 'No active session. Please log in.',
+  'Sessão inválida ou expirada. Inicie sessão novamente.': 'Invalid or expired session. Please log in again.',
+  'Indique o seu nome.': 'Please enter your name.',
+  'Email inválido.': 'Invalid email.',
+  'Telemóvel inválido (9 dígitos, a começar em 9).': 'Invalid phone number (9 digits, starting with 9).',
+  'A password deve ter pelo menos 6 caracteres.': 'Password must be at least 6 characters.',
+  'Já existe uma conta com este email.': 'An account with this email already exists.',
+  'Email ou password incorretos.': 'Incorrect email or password.',
+  'Utilizador não encontrado.': 'User not found.',
+  'Se existir uma conta com este email, foi enviado um email de recuperação.': 'If an account exists with this email, a recovery email has been sent.',
+  'Pedido inválido.': 'Invalid request.',
+  'Token inválido ou expirado. Peça uma nova recuperação de password.': 'Invalid or expired token. Please request a new password recovery.',
+  'Password alterada com sucesso. Já pode entrar.': 'Password changed successfully. You can now log in.',
+  'Serviço inválido.': 'Invalid service.',
+  'Escolha uma data a partir de hoje.': 'Choose a date from today onward.',
+  'Escolha uma hora entre as 9h30 e as 19h30.': 'Choose a time between 9:30am and 7:30pm.',
+  'Marcação não encontrada.': 'Booking not found.',
+  'Esta marcação já não pode ser cancelada.': 'This booking can no longer be cancelled.',
+  'Marcação cancelada.': 'Booking cancelled.',
+};
+function trServerMsg(msg){
+  if(currentLang === 'en' && msg && serverMsgEn[msg]) return serverMsgEn[msg];
+  return msg;
+}
+
+function applyLanguage(lang){
+  currentLang = lang;
+  localStorage.setItem('mb_lang', lang);
+  document.documentElement.lang = lang === 'en' ? 'en' : 'pt-PT';
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if(T[lang] && T[lang][key] !== undefined) el.innerHTML = T[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if(T[lang] && T[lang][key] !== undefined) el.placeholder = T[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-label]').forEach(el => {
+    const key = el.getAttribute('data-i18n-label');
+    if(T[lang] && T[lang][key] !== undefined) el.setAttribute('data-label', T[lang][key]);
+  });
+  document.querySelectorAll('.lang-opt').forEach(el => {
+    el.classList.toggle('active', el.dataset.lang === lang);
+  });
+
+  // O innerHTML de "logged_as" contém o <strong id="loggedName"> — reaplicar o nome depois de traduzir.
+  if(currentUserData){
+    const ln = document.getElementById('loggedName');
+    if(ln) ln.textContent = currentUserData.name;
+  }
+
+  // Re-render conteúdo gerado dinamicamente para ficar no idioma certo
+  if(typeof renderBookings === 'function' && currentUserData && document.getElementById('accountDrawer').classList.contains('open')){
+    renderBookings();
+  }
+}
 
 async function api(path, options = {}){
   const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
@@ -1098,20 +1414,35 @@ burger.addEventListener('click', () => navLinks.classList.toggle('open'));
 navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
 
 /* ============ MODAL HELPERS ============ */
+function switchAuthTab(tab){
+  const isLogin = tab === 'login';
+  document.getElementById('tabLoginBtn').classList.toggle('active', isLogin);
+  document.getElementById('tabSignupBtn').classList.toggle('active', !isLogin);
+  document.getElementById('loginPanel').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('signupPanel').style.display = isLogin ? 'none' : 'block';
+}
+
 function openModal(name){
   document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('open'));
+  if(name === 'login' || name === 'signup'){
+    switchAuthTab(name);
+    document.getElementById('authOverlay').classList.add('open');
+    return;
+  }
   const el = document.getElementById(name + 'Overlay');
   if(el) el.classList.add('open');
 }
 function closeModals(){ document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('open')); }
 
+document.getElementById('tabLoginBtn').addEventListener('click', () => switchAuthTab('login'));
+document.getElementById('tabSignupBtn').addEventListener('click', () => switchAuthTab('signup'));
+
 document.querySelectorAll('[data-open-modal]').forEach(el => {
   el.addEventListener('click', () => openModal(el.dataset.openModal));
 });
 document.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModals));
-document.querySelectorAll('.modal-overlay').forEach(ov => {
-  ov.addEventListener('click', (e) => { if(e.target === ov) closeModals(); });
-});
+// Nota: os modais deixam de fechar ao clicar fora — só fecham pelo X ou após ação concluída.
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeModals(); });
 
 function showMsg(id, text, type){
   const el = document.getElementById(id);
@@ -1142,7 +1473,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     document.getElementById('loginForm').reset();
     document.getElementById('loginMsg').className = 'modal-msg';
   }catch(err){
-    showMsg('loginMsg', err.message || 'Não foi possível ligar ao servidor.', 'error');
+    showMsg('loginMsg', trServerMsg(err.message) || tr('err_generic'), 'error');
   }
 });
 
@@ -1163,7 +1494,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     document.getElementById('signupForm').reset();
     document.getElementById('signupMsg').className = 'modal-msg';
   }catch(err){
-    showMsg('signupMsg', err.message || 'Não foi possível ligar ao servidor.', 'error');
+    showMsg('signupMsg', trServerMsg(err.message) || tr('err_generic'), 'error');
   }
 });
 
@@ -1174,9 +1505,9 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
   if(!email){ showMsg('forgotMsg', 'Indique o seu email.', 'error'); return; }
   try{
     const data = await api('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) });
-    showMsg('forgotMsg', data.message, 'success');
+    showMsg('forgotMsg', trServerMsg(data.message), 'success');
   }catch(err){
-    showMsg('forgotMsg', err.message || 'Não foi possível ligar ao servidor.', 'error');
+    showMsg('forgotMsg', trServerMsg(err.message) || tr('err_generic'), 'error');
   }
 });
 
@@ -1223,7 +1554,12 @@ document.getElementById('loggedSwitch').addEventListener('click', () => {
 });
 
 function statusLabel(s){
-  return { confirmada: 'Confirmada', concluida: 'Concluída', cancelada: 'Cancelada' }[s] || s;
+  return { confirmada: tr('status_confirmada'), concluida: tr('status_concluida'), cancelada: tr('status_cancelada') }[s] || s;
+}
+
+function formatBookingDate(dateStr){
+  const locale = currentLang === 'en' ? 'en-GB' : 'pt-PT';
+  return new Date(dateStr + 'T00:00').toLocaleDateString(locale, { day:'2-digit', month:'long', year:'numeric' });
 }
 
 async function renderBookings(){
@@ -1233,14 +1569,14 @@ async function renderBookings(){
 
   const upcomingList = document.getElementById('upcomingList');
   const pastList = document.getElementById('pastList');
-  upcomingList.innerHTML = '<div class="empty-state">A carregar...</div>';
+  upcomingList.innerHTML = '<div class="empty-state">' + tr('drawer_loading') + '</div>';
   pastList.innerHTML = '';
 
   let bookings = [];
   try{
     bookings = await api('/api/bookings');
   }catch(err){
-    upcomingList.innerHTML = '<div class="empty-state">Não foi possível carregar as marcações.</div>';
+    upcomingList.innerHTML = '<div class="empty-state">' + tr('drawer_load_error') + '</div>';
     return;
   }
 
@@ -1254,13 +1590,13 @@ async function renderBookings(){
   pastList.innerHTML = '';
 
   if(upcoming.length === 0){
-    upcomingList.innerHTML = '<div class="empty-state">Sem marcações futuras. <a href="#marcacoes" style="color:var(--rose); text-decoration:underline;" onclick="closeDrawer()">Marcar agora</a></div>';
+    upcomingList.innerHTML = '<div class="empty-state">' + tr('drawer_empty_upcoming') + '<a href="#marcacoes" style="color:var(--rose); text-decoration:underline;" onclick="closeDrawer()">' + tr('drawer_empty_upcoming_link') + '</a></div>';
   } else {
     upcoming.forEach(b => upcomingList.appendChild(bookingCard(b, true)));
   }
 
   if(past.length === 0){
-    pastList.innerHTML = '<div class="empty-state">Ainda sem histórico.</div>';
+    pastList.innerHTML = '<div class="empty-state">' + tr('drawer_empty_history') + '</div>';
   } else {
     past.forEach(b => pastList.appendChild(bookingCard(b, false)));
   }
@@ -1269,7 +1605,7 @@ async function renderBookings(){
 function bookingCard(b, cancellable){
   const div = document.createElement('div');
   div.className = 'booking-item';
-  const dateFmt = new Date(b.date + 'T00:00').toLocaleDateString('pt-PT', { day:'2-digit', month:'long', year:'numeric' });
+  const dateFmt = formatBookingDate(b.date);
   div.innerHTML =
     '<div class="svc">' + b.service + '</div>' +
     '<div class="meta">' + dateFmt + ' às ' + b.time + '</div>' +
@@ -1277,18 +1613,18 @@ function bookingCard(b, cancellable){
   if(cancellable){
     const btn = document.createElement('button');
     btn.className = 'cancel-btn';
-    btn.textContent = 'Cancelar marcação';
+    btn.textContent = tr('cancel_btn');
     btn.addEventListener('click', async () => {
-      if(!confirm('Tem a certeza que quer cancelar esta marcação?')) return;
+      if(!confirm(tr('cancel_confirm'))) return;
       btn.disabled = true;
-      btn.textContent = 'A cancelar...';
+      btn.textContent = tr('cancel_btn_loading');
       try{
         await api('/api/bookings/' + b.id + '/cancel', { method: 'POST' });
         renderBookings();
       }catch(err){
-        alert(err.message || 'Não foi possível cancelar a marcação.');
+        alert(err.message || tr('cancel_error'));
         btn.disabled = false;
-        btn.textContent = 'Cancelar marcação';
+        btn.textContent = tr('cancel_btn');
       }
     });
     div.appendChild(document.createElement('br'));
@@ -1348,27 +1684,29 @@ form.addEventListener('submit', async (e) => {
   const date = document.getElementById('fdate').value;
   const time = document.getElementById('ftime').value;
   const notes = document.getElementById('fnotes').value.trim();
-  const dateFmt = new Date(date + 'T00:00').toLocaleDateString('pt-PT', { day:'2-digit', month:'long', year:'numeric' });
+  const dateFmt = formatBookingDate(date);
 
   if(currentUserData){
     // Utilizador com sessão iniciada: a marcação fica guardada a sério na conta.
     submitBtn.disabled = true;
-    submitBtn.textContent = 'A enviar...';
+    submitBtn.textContent = tr('submit_booking_sending');
     try{
       await api('/api/bookings', { method: 'POST', body: JSON.stringify({ service, date, time, notes }) });
-      confirmText.textContent = 'Obrigado, ' + name + '! A sua marcação para "' + service + '" em ' + dateFmt + ' às ' + time + ' ficou registada. Já pode acompanhá-la na sua conta.';
+      confirmText.textContent = tr('confirm_msg_account')
+        .replace('{name}', name).replace('{service}', service).replace('{date}', dateFmt).replace('{time}', time);
       formStep.style.display = 'none';
       formConfirm.classList.add('show');
     }catch(err){
-      alert(err.message || 'Não foi possível enviar a marcação. Tente novamente.');
+      alert(trServerMsg(err.message) || tr('err_booking_send'));
     }finally{
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Confirmar Pedido de Marcação';
+      submitBtn.textContent = tr('submit_booking');
     }
   } else {
     // Sem conta: mostramos apenas confirmação — para a marcação ficar guardada
     // e poder ser cancelada depois, é preciso criar conta ou entrar.
-    confirmText.textContent = 'Obrigado, ' + name + '! Recebemos o pedido para "' + service + '" em ' + dateFmt + ' às ' + time + '. Vamos confirmar por telefone brevemente. Crie uma conta para poder acompanhar e cancelar esta marcação online.';
+    confirmText.textContent = tr('confirm_msg_guest')
+      .replace('{name}', name).replace('{service}', service).replace('{date}', dateFmt).replace('{time}', time);
     formStep.style.display = 'none';
     formConfirm.classList.add('show');
   }
@@ -1411,9 +1749,10 @@ function addMsg(text, who){
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-const FALLBACK = 'Não tenho a certeza sobre isso. O melhor é contactar diretamente a Maria Bonita pelo telefone 91 234 56 78 ou pelo email ola@mariabonita.pt — vão poder ajudar melhor. 💛';
+const FALLBACK_PT = 'Não tenho a certeza sobre isso. O melhor é contactar diretamente a Maria Bonita pelo telefone 91 234 56 78 ou pelo email ola@mariabonita.pt — vão poder ajudar melhor. 💛';
+const FALLBACK_EN = 'I\'m not sure about that one. Best to contact Maria Bonita directly by phone at 91 234 56 78 or by email at ola@mariabonita.pt — they\'ll be able to help. 💛';
 
-const faq = [
+const faqPt = [
   { test: /hor[aá]rio|aberto|fecha|funciona/i, a: 'Estamos abertos de Terça a Sexta das 9h30 às 19h30, e Sábado das 9h30 às 18h00. Domingo e Segunda estamos encerrados.' },
   { test: /pre[çc]o|custa|valor|quanto/i, a: 'Os preços começam em: Cabelo desde 18€, Unhas desde 15€, Estética Facial desde 25€, Sobrancelhas desde 12€ e Depilação desde 8€. Tem a tabela completa na secção "Preços" da página. Pacotes de noiva são sob consulta.' },
   { test: /morada|onde fica|endere[çc]o|localiza|mapa/i, a: 'Estamos em Benfica, Lisboa — a morada exata vai ser publicada em breve nesta página. Entretanto pode ligar para 91 234 56 78 para indicações.' },
@@ -1440,12 +1779,41 @@ const faq = [
   { test: /ol[aá]|boa tarde|bom dia|boa noite|hey/i, a: 'Olá! Em que posso ajudar — horários, preços, marcações ou outra dúvida sobre o salão?' }
 ];
 
+const faqEn = [
+  { test: /hour|open|close|closed/i, a: 'We\'re open Tuesday to Friday from 9:30am to 7:30pm, and Saturday from 9:30am to 6pm. Closed on Sunday and Monday.' },
+  { test: /price|cost|how much/i, a: 'Prices start at: Hair from €18, Nails from €15, Facial Skincare from €25, Brows from €12 and Waxing from €8. See the full list in the "Prices" section of the page. Bridal packages are quoted on request.' },
+  { test: /address|located|location|map/i, a: 'We\'re in Benfica, Lisbon — the exact address will be published on this page soon. Meanwhile you can call 91 234 56 78 for directions.' },
+  { test: /book|booking|reserve|appointment|schedule/i, a: 'Great! You can fill in the booking form further down the page, or tell me here the service, day and time you\'d prefer. If you have an account, the booking is also saved to your history.', action: 'scrollBooking' },
+  { test: /cancel/i, a: 'You can cancel a booking from your account: click "Log In" at the top, go to "Upcoming Bookings" and choose "Cancel booking". If you don\'t have an account, call 91 234 56 78.' },
+  { test: /account|login|log in|sign up|register/i, a: 'You can create an account or log in by clicking the "Log In" button at the top of the page. With an account you can see your booking history and cancel anytime.' },
+  { test: /forgot|password|reset/i, a: 'No problem — on the login screen click "Forgot your password?", enter your email and we\'ll send you a real link to choose a new password.' },
+  { test: /payment|pay|card|cash/i, a: 'We accept Multibanco, MB WAY, card and cash. Payment is made at the salon, after the service.' },
+  { test: /cancellation policy|no.show|late|running late/i, a: 'Please let us know at least 3 hours in advance if you can\'t make it. Delays of more than 15 minutes may require rescheduling, depending on the day\'s schedule.' },
+  { test: /service|what do you (do|offer)/i, a: 'We do Hair, Nails, Facial Skincare, Brows & Lashes, Waxing, and Bridal & Event packages.' },
+  { test: /hair|cut|colou?r|balayage|highlight/i, a: 'For hair we do cutting, colouring, highlights/balayage, hair treatments and blow-dry. Women\'s cuts start at €18 and colouring at €35.' },
+  { test: /nail|manicure|pedicure|gel/i, a: 'We do classic (€15) and gel (€22) manicures, full pedicure (€20), nail art and nail reconstruction.' },
+  { test: /brow|lash|henna|lamination/i, a: 'We offer brow shaping (€12), henna (€15), lamination (€20) and lash extensions (from €30).' },
+  { test: /facial|skin cleans|anti.?ag(e|ing)|massage/i, a: 'In facial skincare we do skin cleansing (from €25), anti-ageing treatments (from €35) and facial massage (from €20).' },
+  { test: /wax/i, a: 'Waxing is done with hot and cold wax. Full leg from €15, lip/brow €8 — other areas are quoted on-site.' },
+  { test: /bridal|wedding|event/i, a: 'For weddings and events we offer complete hair and makeup packages, always with a free prior consultation for a tailored quote.' },
+  { test: /contact|phone|email|talk/i, a: 'You can reach us by phone at 91 234 56 78 or by email at ola@mariabonita.pt.' },
+  { test: /parking/i, a: 'The Benfica area has street parking nearby; we don\'t have a dedicated car park.' },
+  { test: /child|kid|baby/i, a: 'You\'re welcome to bring your children, but for everyone\'s safety and comfort we ask that they stay accompanied during the treatment.' },
+  { test: /first time|first visit|new client/i, a: 'On first visits we always do a quick consultation (of your hair or skin, depending on the service) before starting, at no extra cost.' },
+  { test: /promo|discount|voucher|offer/i, a: 'We occasionally run seasonal promotions — the best way not to miss them is to follow us on social media or ask directly at the salon.' },
+  { test: /product|brand/i, a: 'We work with top professional brands, both for hair and skincare — the team can point you to the exact brands in person.' },
+  { test: /thank/i, a: 'You\'re welcome! 😊 I\'m here if you need anything else.' },
+  { test: /hi|hello|hey|good (morning|afternoon|evening)/i, a: 'Hi! How can I help — hours, prices, bookings, or another question about the salon?' }
+];
+
 function scrollToBooking(){ document.getElementById('marcacoes').scrollIntoView({behavior:'smooth'}); }
 
 function handleQuery(raw){
   addMsg(raw, 'user');
+  const faq = currentLang === 'en' ? faqEn : faqPt;
+  const fallback = currentLang === 'en' ? FALLBACK_EN : FALLBACK_PT;
   const match = faq.find(f => f.test.test(raw));
-  const reply = match ? match.a : FALLBACK;
+  const reply = match ? match.a : fallback;
   setTimeout(() => {
     addMsg(reply, 'bot');
     if(match && match.action === 'scrollBooking') setTimeout(scrollToBooking, 500);
@@ -1469,7 +1837,9 @@ chatInput.addEventListener('keydown', (e) => {
 chatSuggestions.addEventListener('click', (e) => {
   const chip = e.target.closest('.chip');
   if(!chip) return;
-  const map = { horario:'Qual o horário?', precos:'Quais os preços?', marcar:'Quero marcar', cancelar:'Como cancelo uma marcação?', pagamento:'Que formas de pagamento aceitam?' };
+  const mapPt = { horario:'Qual o horário?', precos:'Quais os preços?', marcar:'Quero marcar', cancelar:'Como cancelo uma marcação?', pagamento:'Que formas de pagamento aceitam?' };
+  const mapEn = { horario:'What are your hours?', precos:'What are your prices?', marcar:'I want to book', cancelar:'How do I cancel a booking?', pagamento:'What payment methods do you accept?' };
+  const map = currentLang === 'en' ? mapEn : mapPt;
   handleQuery(map[chip.dataset.q]);
 });
 
@@ -1524,9 +1894,14 @@ if(timePicker){
 
 /* init */
 (async function init(){
+  applyLanguage(currentLang);
   await loadCurrentUser();
   refreshAccountUI();
 })();
+
+document.getElementById('langToggle').addEventListener('click', () => {
+  applyLanguage(currentLang === 'pt' ? 'en' : 'pt');
+});
 </script>
 </body>
 </html>
