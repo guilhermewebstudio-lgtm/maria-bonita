@@ -117,7 +117,7 @@
   header:not(.scrolled) .brand, header:not(.scrolled) nav a, header:not(.scrolled) .icon-btn{color:var(--cream);}
   .brand svg{width:26px; height:26px;}
   nav{display:flex; align-items:center; gap:30px;}
-  .nav-links{display:flex; gap:30px;}
+  .nav-links{display:flex; align-items:center; gap:30px;}
   nav a{
     font-size:0.86rem; text-transform:uppercase; letter-spacing:0.12em;
     position:relative; padding-bottom:4px; cursor:pointer;
@@ -674,9 +674,16 @@
   }
   @media (max-width: 380px){
     .hero h1{font-size:2rem;}
-    .brand{font-size:1.05rem;}
+    .brand{font-size:0.98rem; gap:6px;}
+    .brand svg{width:22px; height:22px;}
     .nav-links{width:88%;}
     .gallery-strip{grid-template-columns:1fr 1fr;}
+    header{padding:12px 14px;}
+    nav{gap:8px;}
+    .lang-toggle{padding:5px 8px; font-size:0.7rem;}
+    .icon-btn{padding:7px;}
+    .icon-btn svg{width:17px; height:17px;}
+    .burger{padding:8px; margin:-8px;}
   }
   /* Mobile: impede o zoom automático do iOS ao focar campos (exige >=16px) */
   @media (max-width: 900px){
@@ -732,10 +739,10 @@
 </div>
 
 <header id="header">
-  <div class="brand">
+  <a href="#topo" class="brand" aria-label="Maria Bonita — voltar ao início">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/><path d="M12 14v8M8 22h8"/></svg>
     Maria Bonita
-  </div>
+  </a>
   <nav>
     <div class="nav-links" id="navLinks">
       <a href="#servicos" data-i18n="nav_services">Serviços</a>
@@ -757,7 +764,7 @@
   </nav>
 </header>
 
-<section class="hero">
+<section class="hero" id="topo">
   <div class="hero-bg"></div>
   <svg class="hero-ornament" viewBox="0 0 200 200" fill="none" stroke="#c9a15f" stroke-width="0.5">
     <circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="78"/><circle cx="100" cy="100" r="60"/>
@@ -2020,17 +2027,18 @@ if(timePicker){
 }
 
 /* ============ ANIMAÇÃO DE ENTRADA ============ */
+// Mostra-se sempre que a página carrega (não fica "lembrada"), para a
+// experiência ser sempre igual para toda a gente — só é saltada se a
+// pessoa tiver ativado "reduzir movimento" nas definições do aparelho.
 (function initIntro(){
   const overlay = document.getElementById('introOverlay');
   if(!overlay) return;
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const alreadySeen = sessionStorage.getItem('mb_intro_seen');
 
-  if(reduceMotion || alreadySeen){
+  if(reduceMotion){
     overlay.remove();
     return;
   }
-  sessionStorage.setItem('mb_intro_seen', '1');
   document.body.classList.add('intro-active');
 
   setTimeout(() => {
