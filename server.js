@@ -18,12 +18,16 @@ app.use(express.static(require('path').join(__dirname, 'public')));
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-muda-isto';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5500';
 
+// Cria/promove a conta da Maria Bonita se ADMIN_EMAIL e ADMIN_PASSWORD
+// estiverem definidos nas variáveis de ambiente.
+db.ensureAdminAccount(bcrypt);
+
 /* ---------------------------------------------------------------- */
 /* Utilitários                                                       */
 /* ---------------------------------------------------------------- */
 
 function publicUser(row) {
-  return { id: row.id, name: row.name, email: row.email, phone: row.phone };
+  return { id: row.id, name: row.name, email: row.email, phone: row.phone, is_admin: !!row.is_admin };
 }
 
 function makeToken(user) {
@@ -42,6 +46,13 @@ function auth(req, res, next) {
   } catch {
     return res.status(401).json({ message: 'Sessão inválida ou expirada. Inicie sessão novamente.' });
   }
+}
+
+// Só deixa passar se o utilizador autenticado for a administradora (Maria Bonita).
+function requireAdmin(req, res, next) {
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.userId);
+  if (!user || !user.is_admin) return res.status(403).json({ message: 'Acesso restrito à Maria Bonita.' });
+  next();
 }
 
 function isValidPhone(phone) {
@@ -158,9 +169,11 @@ app.post('/api/bookings', auth, (req, res) => {
   if (!time || time < '09:30' || time > '19:30')
     return res.status(400).json({ message: 'Escolha uma hora entre as 9h30 e as 19h30.' });
 
+  // Toda a marcação nova nasce "pendente" — só fica confirmada quando a
+  // Maria Bonita a aceitar na área dela.
   const info = db.prepare(
     'INSERT INTO bookings (user_id, service, date, time, notes, status) VALUES (?, ?, ?, ?, ?, ?)'
-  ).run(req.userId, service, date, time, notes || null, 'confirmada');
+  ).run(req.userId, service, date, time, notes || null, 'pendente');
 
   const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(info.lastInsertRowid);
   res.status(201).json(booking);
@@ -178,11 +191,53 @@ app.post('/api/bookings/:id/cancel', auth, (req, res) => {
     .get(req.params.id, req.userId);
 
   if (!booking) return res.status(404).json({ message: 'Marcação não encontrada.' });
-  if (booking.status !== 'confirmada')
+  if (booking.status !== 'confirmada' && booking.status !== 'pendente')
     return res.status(400).json({ message: 'Esta marcação já não pode ser cancelada.' });
 
   db.prepare('UPDATE bookings SET status = ? WHERE id = ?').run('cancelada', booking.id);
   res.json({ message: 'Marcação cancelada.' });
+});
+
+/* ---------------------------------------------------------------- */
+/* ÁREA DA MARIA BONITA (administração)                              */
+/* ---------------------------------------------------------------- */
+
+// Lista todas as marcações de todos os clientes, com o nome/contacto de
+// cada um, para a Maria Bonita gerir a agenda toda num único sítio.
+app.get('/api/admin/bookings', auth, requireAdmin, (req, res) => {
+  const bookings = db.prepare(`
+    SELECT b.*, u.name AS client_name, u.phone AS client_phone, u.email AS client_email
+    FROM bookings b
+    JOIN users u ON u.id = b.user_id
+    ORDER BY b.date ASC, b.time ASC
+  `).all();
+  res.json(bookings);
+});
+
+app.post('/api/admin/bookings/:id/accept', auth, requireAdmin, (req, res) => {
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+  if (!booking) return res.status(404).json({ message: 'Marcação não encontrada.' });
+
+  db.prepare('UPDATE bookings SET status = ? WHERE id = ?').run('confirmada', booking.id);
+  res.json({ message: 'Marcação aceite.' });
+});
+
+app.post('/api/admin/bookings/:id/cancel', auth, requireAdmin, (req, res) => {
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+  if (!booking) return res.status(404).json({ message: 'Marcação não encontrada.' });
+
+  db.prepare('UPDATE bookings SET status = ? WHERE id = ?').run('cancelada', booking.id);
+  res.json({ message: 'Marcação cancelada.' });
+});
+
+// Apagar remove mesmo a marcação da base de dados — desaparece por
+// completo (diferente de cancelar, que fica visível no histórico).
+app.delete('/api/admin/bookings/:id', auth, requireAdmin, (req, res) => {
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+  if (!booking) return res.status(404).json({ message: 'Marcação não encontrada.' });
+
+  db.prepare('DELETE FROM bookings WHERE id = ?').run(booking.id);
+  res.json({ message: 'Marcação apagada.' });
 });
 
 /* ---------------------------------------------------------------- */

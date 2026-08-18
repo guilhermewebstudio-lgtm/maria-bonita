@@ -149,10 +149,6 @@
   .burger{display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:10px; margin:-10px; z-index:201; position:relative;}
   .burger span{width:24px; height:2px; background:var(--cream); transition:.3s; transform-origin:center;}
   header.scrolled .burger span{background:var(--bordeaux);}
-  .burger.open span{background:var(--cream) !important;}
-  .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
-  .burger.open span:nth-child(2){opacity:0;}
-  .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
   .nav-overlay{
     display:none; position:fixed; inset:0; z-index:198;
     background:rgba(36,16,18,0.55); backdrop-filter:blur(2px);
@@ -562,6 +558,7 @@
   .status.confirmada{background:#e9f4ec; color:#2f6b48;}
   .status.concluida{background:#eef0f4; color:#4a5568;}
   .status.cancelada{background:#fbeaea; color:#a4322a;}
+  .status.pendente{background:#fdf3e0; color:#9a6b16;}
   .cancel-btn{
     margin-top:10px; background:none; border:1px solid #d9b3b3; color:#a4322a; font-size:0.76rem;
     padding:6px 12px; border-radius:20px; cursor:pointer; text-transform:uppercase; letter-spacing:0.06em;
@@ -574,6 +571,36 @@
     border-radius:2px; cursor:pointer; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.1em;
   }
   .logout-btn:hover{background:var(--bordeaux); color:var(--cream);}
+
+  /* ADMIN AREA (Maria Bonita) */
+  .account-drawer.admin-mode{width:460px; max-width:94vw;}
+  .admin-tabs{display:flex; gap:6px; background:#f3ece0; border-radius:24px; padding:4px; margin-bottom:18px;}
+  .admin-tab{
+    flex:1; text-align:center; padding:9px 6px; border-radius:20px; border:none; background:none; cursor:pointer;
+    font-family:'Jost'; font-size:0.76rem; font-weight:500; color:#8a7278; transition:.2s;
+  }
+  .admin-tab.active{background:var(--bordeaux); color:var(--cream);}
+  .admin-item{
+    border:1px solid var(--line); border-radius:6px; padding:16px; margin-bottom:12px; background:#fdfaf5;
+  }
+  .admin-item .top-row{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px;}
+  .admin-item .client{color:var(--bordeaux); font-weight:600; font-size:0.95rem;}
+  .admin-item .client-contact{font-size:0.78rem; color:#8a7278; margin-top:2px;}
+  .admin-item .svc{color:var(--ink); font-size:0.9rem; margin-bottom:2px;}
+  .admin-item .meta{font-size:0.82rem; color:#6b5259;}
+  .admin-item .notes{font-size:0.8rem; color:#8a7278; font-style:italic; margin-top:6px;}
+  .admin-actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .admin-btn{
+    flex:1; min-width:80px; padding:8px 10px; border-radius:20px; font-size:0.74rem; cursor:pointer;
+    text-transform:uppercase; letter-spacing:0.04em; border:1px solid transparent; transition:.2s;
+  }
+  .admin-btn-accept{background:#2f6b48; color:#fff;}
+  .admin-btn-accept:hover{background:#255839;}
+  .admin-btn-cancel{background:none; border-color:#d9b3b3; color:#a4322a;}
+  .admin-btn-cancel:hover{background:#fbeaea;}
+  .admin-btn-delete{background:none; border-color:#ccc; color:#666;}
+  .admin-btn-delete:hover{background:#f0f0f0;}
+  .admin-btn:disabled{opacity:0.5; cursor:default;}
 
   /* CHATBOT */
   .chat-toggle{
@@ -658,9 +685,10 @@
     .booking-form{padding:30px 24px;}
     .service-picker{grid-template-columns:repeat(2,1fr);}
     .time-picker{grid-template-columns:repeat(3,1fr);}
-    .hero-stats .container{flex-direction:column; gap:14px; padding:18px 22px;}
-    .stat{border-right:none; border-bottom:1px solid rgba(201,161,95,0.2); padding-bottom:14px;}
-    .stat:last-child{border-bottom:none; padding-bottom:0;}
+    .hero-stats .container{display:grid; grid-template-columns:1fr 1fr; gap:12px 8px; padding:16px 20px;}
+    .stat{border-right:none; border-bottom:none; padding:6px 4px;}
+    .stat b{font-size:1.25rem;}
+    .stat span{font-size:0.64rem; letter-spacing:0.06em;}
     .chat-panel{right:12px; bottom:88px; width:92vw; height:70vh;}
     .chat-toggle{right:16px; bottom:16px;}
     .footer-grid{grid-template-columns:1fr 1fr; gap:30px;}
@@ -673,6 +701,7 @@
     .hero-ornament{display:none;}
     .footer-grid{grid-template-columns:1fr;}
     .account-drawer{width:100%; max-width:100%;}
+    .account-drawer.admin-mode{width:100%; max-width:100%;}
     .gallery-strip{grid-template-columns:repeat(2,1fr);}
     .service-picker{grid-template-columns:1fr;}
     .time-picker{grid-template-columns:repeat(3,1fr); gap:6px;}
@@ -1244,10 +1273,22 @@
     <span id="drawerEmail"></span>
   </div>
   <div class="drawer-body" id="drawerBody">
-    <h4 data-i18n="drawer_upcoming">Próximas marcações</h4>
-    <div id="upcomingList"></div>
-    <h4 data-i18n="drawer_history">Histórico</h4>
-    <div id="pastList"></div>
+    <!-- Vista de cliente -->
+    <div id="customerView">
+      <h4 data-i18n="drawer_upcoming">Próximas marcações</h4>
+      <div id="upcomingList"></div>
+      <h4 data-i18n="drawer_history">Histórico</h4>
+      <div id="pastList"></div>
+    </div>
+    <!-- Vista da administradora (Maria Bonita) -->
+    <div id="adminView" style="display:none;">
+      <div class="admin-tabs" id="adminTabs">
+        <button type="button" class="admin-tab active" data-filter="pendente" data-i18n="admin_tab_pending">Pendentes</button>
+        <button type="button" class="admin-tab" data-filter="confirmada" data-i18n="admin_tab_confirmed">Confirmadas</button>
+        <button type="button" class="admin-tab" data-filter="all" data-i18n="admin_tab_all">Todas</button>
+      </div>
+      <div id="adminList"></div>
+    </div>
   </div>
   <div class="drawer-foot">
     <button class="logout-btn" id="logoutBtn" data-i18n="drawer_logout">Terminar sessão</button>
@@ -1373,7 +1414,7 @@ const T = {
     drawer_empty_upcoming:'Sem marcações futuras. ', drawer_empty_upcoming_link:'Marcar agora',
     drawer_empty_history:'Ainda sem histórico.', cancel_btn:'Cancelar marcação', cancel_btn_loading:'A cancelar...',
     cancel_confirm:'Tem a certeza que quer cancelar esta marcação?', cancel_error:'Não foi possível cancelar a marcação.',
-    status_confirmada:'Confirmada', status_concluida:'Concluída', status_cancelada:'Cancelada',
+    status_confirmada:'Confirmada', status_concluida:'Concluída', status_cancelada:'Cancelada', status_pendente:'Pendente',
     chat_title:'Assistente Maria Bonita', chat_subtitle:'Normalmente responde em segundos',
     chat_greeting:'Olá! 👋 Sou a assistente virtual da Maria Bonita. Pergunte-me sobre horários, preços, serviços, marcações, cancelamentos, pagamentos ou qualquer outra dúvida sobre o salão.',
     chip_hours:'Horário', chip_book:'Marcar', chip_cancel:'Cancelar', chip_payment:'Pagamentos', chat_ph:'Escreva a sua pergunta...',
@@ -1381,6 +1422,13 @@ const T = {
     confirm_msg_guest:'Obrigado, {name}! Recebemos o pedido para "{service}" em {date} às {time}. Vamos confirmar por telefone brevemente. Crie uma conta para poder acompanhar e cancelar esta marcação online.',
     err_generic:'Ocorreu um erro. Tente novamente.', err_login:'Email ou password incorretos.',
     err_booking_send:'Não foi possível enviar a marcação. Tente novamente.',
+    admin_tab_pending:'Pendentes', admin_tab_confirmed:'Confirmadas', admin_tab_all:'Todas',
+    admin_title:'Área da Maria Bonita', admin_empty:'Sem marcações nesta categoria.',
+    admin_accept:'Aceitar', admin_cancel:'Cancelar', admin_delete:'Apagar',
+    admin_cancel_confirm:'Cancelar esta marcação? O cliente vai ver como "Cancelada".',
+    admin_delete_confirm:'Apagar esta marcação por completo? Esta ação não pode ser desfeita.',
+    admin_action_error:'Não foi possível concluir a ação. Tente novamente.',
+    admin_load_error:'Não foi possível carregar as marcações.', admin_loading:'A carregar...',
   },
   en: {
     nav_services:'Services', nav_prices:'Prices', nav_about:'About', nav_gallery:'Gallery',
@@ -1457,7 +1505,7 @@ const T = {
     drawer_empty_upcoming:'No upcoming bookings. ', drawer_empty_upcoming_link:'Book now',
     drawer_empty_history:'No history yet.', cancel_btn:'Cancel booking', cancel_btn_loading:'Cancelling...',
     cancel_confirm:'Are you sure you want to cancel this booking?', cancel_error:'Could not cancel the booking.',
-    status_confirmada:'Confirmed', status_concluida:'Completed', status_cancelada:'Cancelled',
+    status_confirmada:'Confirmed', status_concluida:'Completed', status_cancelada:'Cancelled', status_pendente:'Pending',
     chat_title:'Maria Bonita Assistant', chat_subtitle:'Usually replies within seconds',
     chat_greeting:'Hi! 👋 I\'m the Maria Bonita virtual assistant. Ask me about hours, prices, services, bookings, cancellations, payments or anything else about the salon.',
     chip_hours:'Hours', chip_book:'Book', chip_cancel:'Cancel', chip_payment:'Payments', chat_ph:'Type your question...',
@@ -1465,6 +1513,13 @@ const T = {
     confirm_msg_guest:'Thank you, {name}! We received your request for "{service}" on {date} at {time}. We\'ll confirm by phone shortly. Create an account to track and cancel this booking online.',
     err_generic:'Something went wrong. Please try again.', err_login:'Incorrect email or password.',
     err_booking_send:'Could not send the booking. Please try again.',
+    admin_tab_pending:'Pending', admin_tab_confirmed:'Confirmed', admin_tab_all:'All',
+    admin_title:'Maria Bonita Area', admin_empty:'No bookings in this category.',
+    admin_accept:'Accept', admin_cancel:'Cancel', admin_delete:'Delete',
+    admin_cancel_confirm:'Cancel this booking? The client will see it as "Cancelled".',
+    admin_delete_confirm:'Permanently delete this booking? This cannot be undone.',
+    admin_action_error:'Could not complete the action. Please try again.',
+    admin_load_error:'Could not load the bookings.', admin_loading:'Loading...',
   }
 };
 
@@ -1492,6 +1547,9 @@ const serverMsgEn = {
   'Marcação não encontrada.': 'Booking not found.',
   'Esta marcação já não pode ser cancelada.': 'This booking can no longer be cancelled.',
   'Marcação cancelada.': 'Booking cancelled.',
+  'Acesso restrito à Maria Bonita.': 'Restricted to Maria Bonita.',
+  'Marcação aceite.': 'Booking accepted.',
+  'Marcação apagada.': 'Booking deleted.',
 };
 function trServerMsg(msg){
   if(currentLang === 'en' && msg && serverMsgEn[msg]) return serverMsgEn[msg];
@@ -1526,8 +1584,11 @@ function applyLanguage(lang){
   }
 
   // Re-render conteúdo gerado dinamicamente para ficar no idioma certo
-  if(typeof renderBookings === 'function' && currentUserData && document.getElementById('accountDrawer').classList.contains('open')){
-    renderBookings();
+  if(currentUserData && document.getElementById('accountDrawer').classList.contains('open')){
+    const isAdmin = !!currentUserData.is_admin;
+    document.getElementById('drawerName').textContent = isAdmin ? tr('admin_title') : currentUserData.name;
+    if(isAdmin){ if(typeof renderAdminBookings === 'function') renderAdminBookings(); }
+    else { if(typeof renderBookings === 'function') renderBookings(); }
   }
 }
 
@@ -1686,9 +1747,19 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
 /* ============ ACCOUNT DRAWER ============ */
 const accountDrawer = document.getElementById('accountDrawer');
 const drawerOverlay = document.getElementById('drawerOverlay');
+const customerView = document.getElementById('customerView');
+const adminView = document.getElementById('adminView');
 
 function openDrawer(){
-  renderBookings();
+  const isAdmin = !!(currentUserData && currentUserData.is_admin);
+  accountDrawer.classList.toggle('admin-mode', isAdmin);
+  customerView.style.display = isAdmin ? 'none' : 'block';
+  adminView.style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('drawerName').textContent = isAdmin ? tr('admin_title') : currentUserData.name;
+
+  if(isAdmin) renderAdminBookings();
+  else renderBookings();
+
   accountDrawer.classList.add('open');
   drawerOverlay.classList.add('open');
 }
@@ -1726,7 +1797,7 @@ document.getElementById('loggedSwitch').addEventListener('click', () => {
 });
 
 function statusLabel(s){
-  return { confirmada: tr('status_confirmada'), concluida: tr('status_concluida'), cancelada: tr('status_cancelada') }[s] || s;
+  return { confirmada: tr('status_confirmada'), concluida: tr('status_concluida'), cancelada: tr('status_cancelada'), pendente: tr('status_pendente') }[s] || s;
 }
 
 function formatBookingDate(dateStr){
@@ -1753,10 +1824,9 @@ async function renderBookings(){
   }
 
   const today = new Date().toISOString().slice(0,10);
-  const upcoming = bookings.filter(b => b.status === 'confirmada' && b.date >= today)
-    .sort((a,b) => a.date.localeCompare(b.date));
-  const past = bookings.filter(b => !(b.status === 'confirmada' && b.date >= today))
-    .sort((a,b) => b.date.localeCompare(a.date));
+  const isActive = (b) => (b.status === 'confirmada' || b.status === 'pendente') && b.date >= today;
+  const upcoming = bookings.filter(isActive).sort((a,b) => a.date.localeCompare(b.date));
+  const past = bookings.filter(b => !isActive(b)).sort((a,b) => b.date.localeCompare(a.date));
 
   upcomingList.innerHTML = '';
   pastList.innerHTML = '';
@@ -1803,6 +1873,111 @@ function bookingCard(b, cancellable){
     div.appendChild(btn);
   }
   return div;
+}
+
+/* ============ ÁREA DA MARIA BONITA (administração) ============ */
+let adminFilter = 'pendente';
+
+document.getElementById('adminTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.admin-tab');
+  if(!btn) return;
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  adminFilter = btn.dataset.filter;
+  renderAdminBookings();
+});
+
+async function renderAdminBookings(){
+  const list = document.getElementById('adminList');
+  list.innerHTML = '<div class="empty-state">' + tr('admin_loading') + '</div>';
+
+  let bookings = [];
+  try{
+    bookings = await api('/api/admin/bookings');
+  }catch(err){
+    list.innerHTML = '<div class="empty-state">' + tr('admin_load_error') + '</div>';
+    return;
+  }
+
+  const filtered = adminFilter === 'all' ? bookings : bookings.filter(b => b.status === adminFilter);
+  filtered.sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+
+  list.innerHTML = '';
+  if(filtered.length === 0){
+    list.innerHTML = '<div class="empty-state">' + tr('admin_empty') + '</div>';
+    return;
+  }
+  filtered.forEach(b => list.appendChild(adminBookingCard(b)));
+}
+
+function adminBookingCard(b){
+  const div = document.createElement('div');
+  div.className = 'admin-item';
+  const dateFmt = formatBookingDate(b.date);
+
+  const top = document.createElement('div');
+  top.className = 'top-row';
+  top.innerHTML =
+    '<div><div class="client">' + b.client_name + '</div>' +
+    '<div class="client-contact">' + b.client_phone + ' · ' + b.client_email + '</div></div>' +
+    '<span class="status ' + b.status + '">' + statusLabel(b.status) + '</span>';
+  div.appendChild(top);
+
+  const info = document.createElement('div');
+  info.innerHTML =
+    '<div class="svc">' + b.service + '</div>' +
+    '<div class="meta">' + dateFmt + ' às ' + b.time + '</div>' +
+    (b.notes ? '<div class="notes">"' + b.notes + '"</div>' : '');
+  div.appendChild(info);
+
+  const actions = document.createElement('div');
+  actions.className = 'admin-actions';
+
+  if(b.status === 'pendente'){
+    const acceptBtn = document.createElement('button');
+    acceptBtn.className = 'admin-btn admin-btn-accept';
+    acceptBtn.textContent = tr('admin_accept');
+    acceptBtn.addEventListener('click', () => adminAction(b.id, 'accept', acceptBtn));
+    actions.appendChild(acceptBtn);
+  }
+
+  if(b.status === 'pendente' || b.status === 'confirmada'){
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'admin-btn admin-btn-cancel';
+    cancelBtn.textContent = tr('admin_cancel');
+    cancelBtn.addEventListener('click', () => {
+      if(!confirm(tr('admin_cancel_confirm'))) return;
+      adminAction(b.id, 'cancel', cancelBtn);
+    });
+    actions.appendChild(cancelBtn);
+  }
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'admin-btn admin-btn-delete';
+  deleteBtn.textContent = tr('admin_delete');
+  deleteBtn.addEventListener('click', () => {
+    if(!confirm(tr('admin_delete_confirm'))) return;
+    adminAction(b.id, 'delete', deleteBtn);
+  });
+  actions.appendChild(deleteBtn);
+
+  div.appendChild(actions);
+  return div;
+}
+
+async function adminAction(bookingId, action, btn){
+  document.querySelectorAll('.admin-btn').forEach(b => b.disabled = true);
+  try{
+    if(action === 'delete'){
+      await api('/api/admin/bookings/' + bookingId, { method: 'DELETE' });
+    } else {
+      await api('/api/admin/bookings/' + bookingId + '/' + action, { method: 'POST' });
+    }
+    renderAdminBookings();
+  }catch(err){
+    alert(trServerMsg(err.message) || tr('admin_action_error'));
+    document.querySelectorAll('.admin-btn').forEach(b => b.disabled = false);
+  }
 }
 
 /* ============ BOOKING FORM (com validação real) ============ */
