@@ -1700,7 +1700,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const data = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password: pass }) });
     authToken = data.token;
     localStorage.setItem('mb_token', authToken);
-    currentUserData = { id: data.id, name: data.name, email: data.email, phone: data.phone };
+    currentUserData = { id: data.id, name: data.name, email: data.email, phone: data.phone, is_admin: !!data.is_admin };
     closeModals();
     refreshAccountUI();
     document.getElementById('loginForm').reset();
@@ -1721,7 +1721,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     const data = await api('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, phone, password: pass }) });
     authToken = data.token;
     localStorage.setItem('mb_token', authToken);
-    currentUserData = { id: data.id, name: data.name, email: data.email, phone: data.phone };
+    currentUserData = { id: data.id, name: data.name, email: data.email, phone: data.phone, is_admin: !!data.is_admin };
     closeModals();
     refreshAccountUI();
     document.getElementById('signupForm').reset();
