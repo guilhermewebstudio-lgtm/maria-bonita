@@ -521,6 +521,14 @@
   .input-icon{position:relative;}
   .input-icon svg{position:absolute; left:14px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:#a2898f; pointer-events:none;}
   .input-icon input{padding-left:40px !important;}
+  .input-icon-toggle input{padding-right:40px !important;}
+  .pw-toggle{
+    position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none;
+    cursor:pointer; padding:4px; color:#a2898f; display:flex;
+  }
+  .pw-toggle:hover{color:var(--bordeaux);}
+  .pw-toggle svg{position:static; width:17px; height:17px; pointer-events:auto;}
+  .pw-toggle.showing svg{color:var(--bordeaux);}
   @media (max-width: 640px){
     .modal-side{display:none;}
     .modal-main{padding:32px 26px;}
@@ -532,11 +540,11 @@
   }
   .drawer-overlay.open{display:block;}
   .account-drawer{
-    position:fixed; top:0; right:-420px; width:400px; max-width:92vw; height:100%; z-index:400;
-    background:#fff; box-shadow:-20px 0 60px rgba(0,0,0,0.25); transition:right .35s ease;
-    display:flex; flex-direction:column;
+    position:fixed; top:0; right:0; width:400px; max-width:92vw; height:100%; z-index:400;
+    background:#fff; box-shadow:-20px 0 60px rgba(0,0,0,0.25); transition:transform .35s ease;
+    display:flex; flex-direction:column; transform:translateX(100%);
   }
-  .account-drawer.open{right:0;}
+  .account-drawer.open{transform:translateX(0);}
   .drawer-head{
     background:var(--bordeaux); color:var(--cream); padding:26px 26px 22px;
   }
@@ -1184,9 +1192,12 @@
           </div>
           <div class="field">
             <label for="loginPassword" data-i18n="label_password">Password</label>
-            <div class="input-icon">
+            <div class="input-icon input-icon-toggle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
               <input id="loginPassword" type="password" placeholder="••••••••" required>
+              <button type="button" class="pw-toggle" data-target="loginPassword" aria-label="Mostrar password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
             </div>
           </div>
           <button type="submit" class="submit-btn" data-i18n="btn_login">Entrar</button>
@@ -1226,9 +1237,12 @@
           </div>
           <div class="field">
             <label for="signupPassword" data-i18n="label_password">Password</label>
-            <div class="input-icon">
+            <div class="input-icon input-icon-toggle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
               <input id="signupPassword" type="password" data-i18n-placeholder="ph_min6" placeholder="Mínimo 6 caracteres" required>
+              <button type="button" class="pw-toggle" data-target="signupPassword" aria-label="Mostrar password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
             </div>
           </div>
           <button type="submit" class="submit-btn" data-i18n="btn_signup">Criar Conta</button>
@@ -1578,9 +1592,12 @@ function applyLanguage(lang){
   });
 
   // O innerHTML de "logged_as" contém o <strong id="loggedName"> — reaplicar o nome depois de traduzir.
+  // O accountLabel também tem data-i18n (para mostrar "Entrar" quando ninguém
+  // tem sessão iniciada), por isso, se houver sessão, repomos o nome por cima.
   if(currentUserData){
     const ln = document.getElementById('loggedName');
     if(ln) ln.textContent = currentUserData.name;
+    accountLabel.textContent = currentUserData.name.split(' ')[0];
   }
 
   // Re-render conteúdo gerado dinamicamente para ficar no idioma certo
@@ -1647,6 +1664,16 @@ navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav
 document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeNav(); });
 
 /* ============ MODAL HELPERS ============ */
+/* ============ MOSTRAR / OCULTAR PASSWORD ============ */
+document.querySelectorAll('.pw-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const input = document.getElementById(btn.dataset.target);
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.classList.toggle('showing', !showing);
+  });
+});
+
 function switchAuthTab(tab){
   const isLogin = tab === 'login';
   document.getElementById('tabLoginBtn').classList.toggle('active', isLogin);
@@ -2099,66 +2126,185 @@ function addMsg(text, who){
 const FALLBACK_PT = 'Não tenho a certeza sobre isso. O melhor é contactar diretamente a Maria Bonita pelo telefone 91 234 56 78 ou pelo email ola@mariabonita.pt — vão poder ajudar melhor. 💛';
 const FALLBACK_EN = 'I\'m not sure about that one. Best to contact Maria Bonita directly by phone at 91 234 56 78 or by email at ola@mariabonita.pt — they\'ll be able to help. 💛';
 
+// Nota: todos os padrões usam \b (fronteira de palavra) para não confundir
+// palavras parecidas — ex: "marca" (produto) não deve responder a "marcações"
+// nem "conta" (conta de utilizador) deve responder a "contactar".
 const faqPt = [
-  { test: /hor[aá]rio|aberto|fecha|funciona/i, a: 'Estamos abertos de Terça a Sexta das 9h30 às 19h30, e Sábado das 9h30 às 18h00. Domingo e Segunda estamos encerrados.' },
-  { test: /pre[çc]o|custa|valor|quanto/i, a: 'Os preços começam em: Cabelo desde 18€, Unhas desde 15€, Estética Facial desde 25€, Sobrancelhas desde 12€ e Depilação desde 8€. Tem a tabela completa na secção "Preços" da página. Pacotes de noiva são sob consulta.' },
-  { test: /morada|onde fica|endere[çc]o|localiza|mapa/i, a: 'Estamos em Benfica, Lisboa — a morada exata vai ser publicada em breve nesta página. Entretanto pode ligar para 91 234 56 78 para indicações.' },
-  { test: /marcar|marca[çc][aã]o|reservar|agendar/i, a: 'Ótimo! Pode preencher o formulário de marcações mais abaixo na página, ou diga-me aqui o serviço, dia e hora que prefere. Se tiver conta, a marcação fica também guardada no seu histórico.', action: 'scrollBooking' },
-  { test: /cancelar/i, a: 'Pode cancelar uma marcação a partir da sua conta: clique em "Entrar" no topo, veja "Próximas marcações" e escolha "Cancelar marcação". Se não tiver conta, ligue para 91 234 56 78.' },
-  { test: /conta|login|entrar|registar|criar conta/i, a: 'Pode criar conta ou entrar clicando no botão "Entrar" no topo da página. Com conta, vê o histórico de marcações e pode cancelar quando quiser.' },
-  { test: /esqueci|password|recuperar/i, a: 'Sem problema — no ecrã de login clique em "Esqueceu-se da password?", indique o seu email e enviamos-lhe uma hiperligação a sério para escolher uma password nova.' },
-  { test: /pagamento|pagar|multibanco|mbway|cart[aã]o|dinheiro/i, a: 'Aceitamos Multibanco, MB WAY, cartão e dinheiro. O pagamento é feito no salão, após o serviço.' },
-  { test: /cancela.*pol[ií]tica|falta|n[aã]o.*aparecer|atraso/i, a: 'Pedimos para avisar com pelo menos 3 horas de antecedência se não puder comparecer. Atrasos superiores a 15 minutos podem obrigar a reagendar, consoante a agenda do dia.' },
-  { test: /servi[çc]o|fazem|o que.*ofere/i, a: 'Trabalhamos Cabelo, Unhas, Estética Facial, Sobrancelhas & Pestanas, Depilação, e pacotes de Noiva & Eventos.' },
-  { test: /cabelo|corte|cor|balayage|mecha|tinta/i, a: 'No cabelo fazemos corte, coloração, mechas/balayage, tratamentos capilares e escova. O corte feminino começa em 18€ e a coloração em 35€.' },
-  { test: /unha|manicure|pedicure|gel|nail/i, a: 'Fazemos manicure clássica (15€) e em gel (22€), pedicure completa (20€), nail art e reconstrução de unhas.' },
-  { test: /sobrancelha|pestana|henna|lamina[çc][aã]o/i, a: 'Temos design de sobrancelhas (12€), henna (15€), laminação (20€) e extensão de pestanas (desde 30€).' },
-  { test: /facial|limpeza de pele|anti-idade|massagem/i, a: 'Na estética facial fazemos limpeza de pele (desde 25€), tratamentos anti-idade (desde 35€) e massagem facial (desde 20€).' },
-  { test: /depila[çc][aã]o|cera/i, a: 'A depilação é feita com cera quente e fria. Perna completa desde 15€, buço/sobrancelha 8€ — outras zonas são orçamentadas no local.' },
-  { test: /noiv|casamento|evento/i, a: 'Para noivas e eventos fazemos pacotes completos de cabelo e maquilhagem, sempre com consulta gratuita prévia para orçamento à medida.' },
-  { test: /contacto|telefone|email|falar/i, a: 'Pode contactar-nos pelo telefone 91 234 56 78 ou pelo email ola@mariabonita.pt.' },
-  { test: /estacionamento|parque|carro/i, a: 'A zona de Benfica tem estacionamento na via pública nas imediações; não temos parque próprio dedicado.' },
-  { test: /crian[çc]a|filho|beb[eé]/i, a: 'Pode trazer os seus filhos, mas por segurança e conforto de todos, pedimos que fiquem sempre acompanhados durante o tratamento.' },
-  { test: /primeira vez|primeira visita|novo cliente/i, a: 'Nas primeiras visitas fazemos sempre um pequeno diagnóstico (do cabelo ou da pele, consoante o serviço) antes de começar, sem custo adicional.' },
-  { test: /promo[çc][aã]o|desconto|vale|oferta/i, a: 'De vez em quando temos promoções sazonais — a melhor forma de não perder é seguir-nos nas redes sociais ou perguntar diretamente no salão.' },
-  { test: /produto|marca|que uso/i, a: 'Trabalhamos com produtos profissionais de marcas de topo, tanto em cabelo como em estética — a equipa pode indicar as marcas exatas presencialmente.' },
-  { test: /obrigad|thanks|valeu/i, a: 'De nada! 😊 Fico por aqui se precisar de mais alguma coisa.' },
-  { test: /ol[aá]|boa tarde|bom dia|boa noite|hey/i, a: 'Olá! Em que posso ajudar — horários, preços, marcações ou outra dúvida sobre o salão?' }
+  { test: /\bquantas\b.*\bmarca[çc][õo]es\b|\blimite\b.*\bmarca[çc][õo]es\b|\bmarca[çc][õo]es\b.*\bquantas\b/i,
+    a: 'Não há um limite fixo — pode fazer quantas marcações precisar. Se quiser vários serviços diferentes, o mais simples é fazer uma marcação por serviço (ou indicar tudo nas notas e confirmamos consigo).' },
+  { test: /\bhor[aá]rio\b|\baberto\b|\baberta\b|\bfecha(m)?\b|\bfunciona(m)?\b|\ba que horas\b/i,
+    a: 'Estamos abertos de Terça a Sexta das 9h30 às 19h30, e Sábado das 9h30 às 18h00. Domingo e Segunda estamos encerrados.' },
+  { test: /\bpre[çc]os?\b|\bcusta(m)?\b|\bvalor(es)?\b|\bquanto\b|\bquanto custa\b/i,
+    a: 'Os preços começam em: Cabelo desde 18€, Unhas desde 15€, Estética Facial desde 25€, Sobrancelhas desde 12€ e Depilação desde 8€. Tem a tabela completa na secção "Preços" da página. Pacotes de noiva são sob consulta.' },
+  { test: /\bmorada\b|\bonde fica\b|\bendere[çc]o\b|\blocaliza(m|ção)?\b|\bmapa\b|\bcomo chego\b|\btransportes?\b|\bautocarro\b|\bmetro\b/i,
+    a: 'Estamos em Benfica, Lisboa — a morada exata vai ser publicada em breve nesta página, com mapa e indicações de transportes. Entretanto pode ligar para 91 234 56 78 para indicações.' },
+  { test: /\bcancelar\b|\breagendar\b|\bmudar\b.*\b(data|hora|dia)\b|\badiar\b/i,
+    a: 'Pode cancelar ou pedir para reagendar uma marcação a partir da sua conta: clique em "Entrar" no topo, veja "Próximas marcações" e escolha "Cancelar marcação". Para reagendar, cancele e faça uma nova marcação para o dia/hora que preferir, ou ligue para 91 234 56 78.' },
+  { test: /\bmarcar\b|\bmarcada\b|\bmarcadas\b|\bmarca[çc][ãa]o\b|\bmarca[çc][õo]es\b|\breservar\b|\bagendar\b|\bhor[aá]rio dispon[ií]vel\b/i,
+    a: 'Ótimo! Pode preencher o formulário de marcações mais abaixo na página, ou diga-me aqui o serviço, dia e hora que prefere. Se tiver conta, a marcação fica também guardada no seu histórico.', action: 'scrollBooking' },
+  { test: /\bmesmo dia\b|\b[uú]ltima hora\b|\bhoje\b.*\bmarca/i,
+    a: 'Fazemos os possíveis por encaixar pedidos de última hora, consoante a agenda do dia — o mais rápido é ligar para 91 234 56 78 para confirmarmos disponibilidade imediata.' },
+  { test: /\bantecedência\b|\bcom quanto tempo\b|\bquando devo marcar\b/i,
+    a: 'Não há uma antecedência mínima obrigatória, mas para serviços mais procurados (como noiva ou fins de semana) recomendamos marcar com pelo menos 1 semana de antecedência.' },
+  { test: /\bescolher\b.*\bprofissional\b|\bespecialista espec[íi]fic|\bmesma pessoa\b/i,
+    a: 'Sim, se tiver preferência por um profissional em concreto, pode indicar isso nas notas da marcação ou dizer-nos por telefone.' },
+  { test: /\bacompanh(ar|ante)\b|\blevar algu[ée]m\b|\bposso ir com\b/i,
+    a: 'Claro, pode vir acompanhada — só pedimos que, por questões de espaço e conforto de todos, quem acompanha aguarde na zona de espera durante o serviço.' },
+  { test: /\bquanto tempo demora\b|\bdura[çc][ãa]o\b|\bquanto demora\b/i,
+    a: 'Depende do serviço: uma manicure simples ronda os 30-45 minutos, um corte+escova cerca de 45-60 minutos, e colorações ou pacotes de noiva podem demorar 2 horas ou mais. Podemos confirmar a duração exata quando marcar.' },
+  { test: /\bconta\b|\blogin\b|\bentrar\b|\bregistar\b|\bcriar conta\b|\bter conta\b/i,
+    a: 'Pode criar conta ou entrar clicando no botão "Entrar" no topo da página. Com conta, vê o histórico de marcações e pode cancelar quando quiser.' },
+  { test: /\besqueci\b|\bpassword\b|\brecuperar\b/i,
+    a: 'Sem problema — no ecrã de login clique em "Esqueceu-se da password?", indique o seu email e enviamos-lhe uma hiperligação a sério para escolher uma password nova.' },
+  { test: /\bpagamento\b|\bpagar\b|\bmultibanco\b|\bmbway\b|\bmb way\b|\bcart[ãa]o\b|\bdinheiro\b|\bsinal\b|\bdep[óo]sito\b/i,
+    a: 'Aceitamos Multibanco, MB WAY, cartão e dinheiro. O pagamento é feito no salão, após o serviço — não pedimos sinal antecipado.' },
+  { test: /\bfalta\b|\bn[ãa]o.*\baparecer\b|\batraso\b|\batrasar\b|\bpolítica de cancelamento\b/i,
+    a: 'Pedimos para avisar com pelo menos 3 horas de antecedência se não puder comparecer. Atrasos superiores a 15 minutos podem obrigar a reagendar, consoante a agenda do dia.' },
+  { test: /\bservi[çc]os?\b|\bfazem\b|\bo que.*ofere/i,
+    a: 'Trabalhamos Cabelo, Unhas, Estética Facial, Sobrancelhas & Pestanas, Depilação, e pacotes de Noiva & Eventos.' },
+  { test: /\bcabelo\b|\bcorte\b|\bcor\b|\bbalayage\b|\bmecha(s)?\b|\btinta\b|\bpintar\b/i,
+    a: 'No cabelo fazemos corte, coloração, mechas/balayage, tratamentos capilares e escova. O corte feminino começa em 18€ e a coloração em 35€.' },
+  { test: /\bunhas?\b|\bmanicure\b|\bpedicure\b|\bgel\b|\bnail\b/i,
+    a: 'Fazemos manicure clássica (15€) e em gel (22€), pedicure completa (20€), nail art e reconstrução de unhas.' },
+  { test: /\bsobrancelha(s)?\b|\bpestana(s)?\b|\bhenna\b|\blamina[çc][ãa]o\b/i,
+    a: 'Temos design de sobrancelhas (12€), henna (15€), laminação (20€) e extensão de pestanas (desde 30€).' },
+  { test: /\bfacial\b|\blimpeza de pele\b|\banti-idade\b|\bmassagem\b/i,
+    a: 'Na estética facial fazemos limpeza de pele (desde 25€), tratamentos anti-idade (desde 35€) e massagem facial (desde 20€).' },
+  { test: /\bdepila[çc][ãa]o\b|\bcera\b/i,
+    a: 'A depilação é feita com cera quente e fria. Perna completa desde 15€, buço/sobrancelha 8€ — outras zonas são orçamentadas no local.' },
+  { test: /\balergi(a|as)\b|\bteste de sensibilidade\b|\bpele sens[íi]vel\b/i,
+    a: 'Se tiver alergias conhecidas ou pele sensível, avise-nos ao marcar — para alguns tratamentos (como coloração) podemos fazer um teste de sensibilidade antes, sem custo.' },
+  { test: /\bnoiv(a|o)\b|\bcasamento\b|\bevento\b|\bfesta\b|\bdespedida de solteira\b|\bgrupo\b/i,
+    a: 'Para noivas e eventos fazemos pacotes completos de cabelo e maquilhagem, sempre com consulta gratuita prévia para orçamento à medida. Também recebemos grupos (ex: despedidas de solteira) — fale connosco para combinar horários.' },
+  { test: /\bcontact(ar|o|ámos|amos)?\b|\btelefone\b|\bemail\b|\bfalar (com|convosco)\b|\bnúmero\b/i,
+    a: 'Pode contactar-nos pelo telefone 91 234 56 78 ou pelo email ola@mariabonita.pt.' },
+  { test: /\bestacionamento\b|\bparque\b|\bcarro\b/i,
+    a: 'A zona de Benfica tem estacionamento na via pública nas imediações; não temos parque próprio dedicado.' },
+  { test: /\bwifi\b|\binternet\b/i,
+    a: 'Sim, temos wifi gratuito disponível para clientes enquanto aguardam ou são atendidas.' },
+  { test: /\bcrian[çc]a(s)?\b|\bfilho(s)?\b|\bbeb[eé](s)?\b|\bidade m[íi]nima\b|\bmenor(es)?\b/i,
+    a: 'Pode trazer os seus filhos, mas por segurança e conforto de todos, pedimos que fiquem sempre acompanhados durante o tratamento. Para alguns serviços (ex: coloração) pode haver idade mínima recomendada — pergunte-nos ao marcar.' },
+  { test: /\bprimeira vez\b|\bprimeira visita\b|\bnovo cliente\b|\bo que trazer\b/i,
+    a: 'Nas primeiras visitas fazemos sempre um pequeno diagnóstico (do cabelo ou da pele, consoante o serviço) antes de começar, sem custo adicional. Não precisa de trazer nada, só chegar um pouco antes da hora marcada.' },
+  { test: /\bpromo[çc][ãa]o\b|\bdesconto\b|\bvale(s)? oferta\b|\boferta(s)?\b|\bcart[ãa]o oferta\b|\bfidelização\b|\bfidelidade\b/i,
+    a: 'De vez em quando temos promoções sazonais, e também vendemos vales oferta para presentear. A melhor forma de não perder novidades é seguir-nos nas redes sociais ou perguntar diretamente no salão.' },
+  { test: /\bproduto(s)?\b|\bmarca\b|\bque uso\b|\bque marcas\b/i,
+    a: 'Trabalhamos com produtos profissionais de marcas de topo, tanto em cabelo como em estética — a equipa pode indicar as marcas exatas presencialmente.' },
+  { test: /\bhigiene\b|\bmaterial esterilizado\b|\blimpo\b|\bseguran[çc]a\b/i,
+    a: 'Seguimos regras rigorosas de higiene: material esterilizado ou descartável, e limpeza cuidada entre cada cliente.' },
+  { test: /\bfumar\b|\bfumador\b/i,
+    a: 'O salão é um espaço totalmente livre de fumo.' },
+  { test: /\banimais\b|\bc[ãa]o\b|\bgato\b|\bpet(s)?\b/i,
+    a: 'Por norma não são permitidos animais de estimação dentro do salão, salvo cães de assistência.' },
+  { test: /\bl[íi]ngua(s)?\b|\bfalam ingl[êe]s\b|\bidiomas?\b/i,
+    a: 'A equipa fala português e inglês — pode à-vontade comunicar em qualquer um dos dois.' },
+  { test: /\bobrigad(o|a)\b|\bvaleu\b|\bfixe\b/i,
+    a: 'De nada! 😊 Fico por aqui se precisar de mais alguma coisa.' },
+  { test: /\btchau\b|\badeus\b|\baté já\b|\bat[ée] logo\b/i,
+    a: 'Até já! 👋 Volte sempre que precisar.' },
+  { test: /\bol[aá]\b|\bboa tarde\b|\bbom dia\b|\bboa noite\b|\bhey\b/i,
+    a: 'Olá! Em que posso ajudar — horários, preços, marcações ou outra dúvida sobre o salão?' }
 ];
 
 const faqEn = [
-  { test: /hour|open|close|closed/i, a: 'We\'re open Tuesday to Friday from 9:30am to 7:30pm, and Saturday from 9:30am to 6pm. Closed on Sunday and Monday.' },
-  { test: /price|cost|how much/i, a: 'Prices start at: Hair from €18, Nails from €15, Facial Skincare from €25, Brows from €12 and Waxing from €8. See the full list in the "Prices" section of the page. Bridal packages are quoted on request.' },
-  { test: /address|located|location|map/i, a: 'We\'re in Benfica, Lisbon — the exact address will be published on this page soon. Meanwhile you can call 91 234 56 78 for directions.' },
-  { test: /book|booking|reserve|appointment|schedule/i, a: 'Great! You can fill in the booking form further down the page, or tell me here the service, day and time you\'d prefer. If you have an account, the booking is also saved to your history.', action: 'scrollBooking' },
-  { test: /cancel/i, a: 'You can cancel a booking from your account: click "Log In" at the top, go to "Upcoming Bookings" and choose "Cancel booking". If you don\'t have an account, call 91 234 56 78.' },
-  { test: /account|login|log in|sign up|register/i, a: 'You can create an account or log in by clicking the "Log In" button at the top of the page. With an account you can see your booking history and cancel anytime.' },
-  { test: /forgot|password|reset/i, a: 'No problem — on the login screen click "Forgot your password?", enter your email and we\'ll send you a real link to choose a new password.' },
-  { test: /payment|pay|card|cash/i, a: 'We accept Multibanco, MB WAY, card and cash. Payment is made at the salon, after the service.' },
-  { test: /cancellation policy|no.show|late|running late/i, a: 'Please let us know at least 3 hours in advance if you can\'t make it. Delays of more than 15 minutes may require rescheduling, depending on the day\'s schedule.' },
-  { test: /service|what do you (do|offer)/i, a: 'We do Hair, Nails, Facial Skincare, Brows & Lashes, Waxing, and Bridal & Event packages.' },
-  { test: /hair|cut|colou?r|balayage|highlight/i, a: 'For hair we do cutting, colouring, highlights/balayage, hair treatments and blow-dry. Women\'s cuts start at €18 and colouring at €35.' },
-  { test: /nail|manicure|pedicure|gel/i, a: 'We do classic (€15) and gel (€22) manicures, full pedicure (€20), nail art and nail reconstruction.' },
-  { test: /brow|lash|henna|lamination/i, a: 'We offer brow shaping (€12), henna (€15), lamination (€20) and lash extensions (from €30).' },
-  { test: /facial|skin cleans|anti.?ag(e|ing)|massage/i, a: 'In facial skincare we do skin cleansing (from €25), anti-ageing treatments (from €35) and facial massage (from €20).' },
-  { test: /wax/i, a: 'Waxing is done with hot and cold wax. Full leg from €15, lip/brow €8 — other areas are quoted on-site.' },
-  { test: /bridal|wedding|event/i, a: 'For weddings and events we offer complete hair and makeup packages, always with a free prior consultation for a tailored quote.' },
-  { test: /contact|phone|email|talk/i, a: 'You can reach us by phone at 91 234 56 78 or by email at ola@mariabonita.pt.' },
-  { test: /parking/i, a: 'The Benfica area has street parking nearby; we don\'t have a dedicated car park.' },
-  { test: /child|kid|baby/i, a: 'You\'re welcome to bring your children, but for everyone\'s safety and comfort we ask that they stay accompanied during the treatment.' },
-  { test: /first time|first visit|new client/i, a: 'On first visits we always do a quick consultation (of your hair or skin, depending on the service) before starting, at no extra cost.' },
-  { test: /promo|discount|voucher|offer/i, a: 'We occasionally run seasonal promotions — the best way not to miss them is to follow us on social media or ask directly at the salon.' },
-  { test: /product|brand/i, a: 'We work with top professional brands, both for hair and skincare — the team can point you to the exact brands in person.' },
-  { test: /thank/i, a: 'You\'re welcome! 😊 I\'m here if you need anything else.' },
-  { test: /hi|hello|hey|good (morning|afternoon|evening)/i, a: 'Hi! How can I help — hours, prices, bookings, or another question about the salon?' }
+  { test: /\bhow many\b.*\bbooking(s)?\b|\blimit\b.*\bbooking(s)?\b/i,
+    a: 'There\'s no fixed limit — you can make as many bookings as you need. If you\'d like several different services, the simplest way is one booking per service (or mention everything in the notes and we\'ll confirm with you).' },
+  { test: /\bhour(s)?\b|\bopen\b|\bclose(d)?\b|\bwhat time\b/i,
+    a: 'We\'re open Tuesday to Friday from 9:30am to 7:30pm, and Saturday from 9:30am to 6pm. Closed on Sunday and Monday.' },
+  { test: /\bprice(s)?\b|\bcost(s)?\b|\bhow much\b/i,
+    a: 'Prices start at: Hair from €18, Nails from €15, Facial Skincare from €25, Brows from €12 and Waxing from €8. See the full list in the "Prices" section of the page. Bridal packages are quoted on request.' },
+  { test: /\baddress\b|\blocated\b|\blocation\b|\bmap\b|\bhow do i get\b|\btransport\b|\bbus\b|\bmetro\b/i,
+    a: 'We\'re in Benfica, Lisbon — the exact address and directions will be published here soon. Meanwhile you can call 91 234 56 78 for directions.' },
+  { test: /\bcancel\b|\breschedule\b|\bchange\b.*\b(date|time)\b|\bpostpone\b/i,
+    a: 'You can cancel or ask to reschedule a booking from your account: click "Log In" at the top, go to "Upcoming Bookings" and choose "Cancel booking". To reschedule, cancel and make a new booking for your preferred day/time, or call 91 234 56 78.' },
+  { test: /\bbook(ing)?\b|\breserve\b|\bappointment\b|\bschedule\b|\bavailability\b/i,
+    a: 'Great! You can fill in the booking form further down the page, or tell me here the service, day and time you\'d prefer. If you have an account, the booking is also saved to your history.', action: 'scrollBooking' },
+  { test: /\bsame day\b|\blast minute\b|\btoday\b.*\bbook/i,
+    a: 'We do our best to fit in last-minute requests depending on the day\'s schedule — the fastest way is to call 91 234 56 78 to check immediate availability.' },
+  { test: /\bin advance\b|\bhow soon\b|\bwhen should i book\b/i,
+    a: 'There\'s no mandatory minimum notice, but for popular services (like bridal or weekends) we recommend booking at least 1 week ahead.' },
+  { test: /\bchoose\b.*\b(stylist|specialist|professional)\b|\bsame person\b/i,
+    a: 'Yes, if you have a preference for a specific professional, just mention it in the booking notes or let us know by phone.' },
+  { test: /\baccompan(y|ied)\b|\bbring someone\b|\bcan i bring\b/i,
+    a: 'Of course, you\'re welcome to bring someone along — we just ask that, for space and everyone\'s comfort, they wait in the waiting area during the service.' },
+  { test: /\bhow long\b.*\b(take|does)\b|\bduration\b/i,
+    a: 'It depends on the service: a simple manicure is around 30-45 minutes, a cut+blow-dry about 45-60 minutes, and colouring or bridal packages can take 2 hours or more. We can confirm exact timing when you book.' },
+  { test: /\baccount\b|\blog ?in\b|\bsign ?up\b|\bregister\b/i,
+    a: 'You can create an account or log in by clicking the "Log In" button at the top of the page. With an account you can see your booking history and cancel anytime.' },
+  { test: /\bforgot\b|\bpassword\b|\breset\b/i,
+    a: 'No problem — on the login screen click "Forgot your password?", enter your email and we\'ll send you a real link to choose a new password.' },
+  { test: /\bpayment\b|\bpay\b|\bcard\b|\bcash\b|\bdeposit\b/i,
+    a: 'We accept Multibanco, MB WAY, card and cash. Payment is made at the salon, after the service — we don\'t ask for an upfront deposit.' },
+  { test: /\bno.show\b|\blate\b|\brunning late\b|\bcancellation policy\b/i,
+    a: 'Please let us know at least 3 hours in advance if you can\'t make it. Delays of more than 15 minutes may require rescheduling, depending on the day\'s schedule.' },
+  { test: /\bservice(s)?\b|\bwhat do you (do|offer)\b/i,
+    a: 'We do Hair, Nails, Facial Skincare, Brows & Lashes, Waxing, and Bridal & Event packages.' },
+  { test: /\bhair\b|\bcut\b|\bcolou?r\b|\bbalayage\b|\bhighlight(s)?\b/i,
+    a: 'For hair we do cutting, colouring, highlights/balayage, hair treatments and blow-dry. Women\'s cuts start at €18 and colouring at €35.' },
+  { test: /\bnail(s)?\b|\bmanicure\b|\bpedicure\b|\bgel\b/i,
+    a: 'We do classic (€15) and gel (€22) manicures, full pedicure (€20), nail art and nail reconstruction.' },
+  { test: /\bbrow(s)?\b|\blash(es)?\b|\bhenna\b|\blamination\b/i,
+    a: 'We offer brow shaping (€12), henna (€15), lamination (€20) and lash extensions (from €30).' },
+  { test: /\bfacial\b|\bskin clean\b|\banti.?ag(e|ing)\b|\bmassage\b/i,
+    a: 'In facial skincare we do skin cleansing (from €25), anti-ageing treatments (from €35) and facial massage (from €20).' },
+  { test: /\bwax(ing)?\b/i,
+    a: 'Waxing is done with hot and cold wax. Full leg from €15, lip/brow €8 — other areas are quoted on-site.' },
+  { test: /\ballerg(y|ies)\b|\bpatch test\b|\bsensitive skin\b/i,
+    a: 'If you have known allergies or sensitive skin, let us know when booking — for some treatments (like colouring) we can do a free patch test beforehand.' },
+  { test: /\bbridal\b|\bwedding\b|\bevent\b|\bparty\b|\bhen do\b|\bgroup\b/i,
+    a: 'For weddings and events we offer complete hair and makeup packages, always with a free prior consultation for a tailored quote. We also welcome groups (like hen parties) — get in touch to arrange timing.' },
+  { test: /\bcontact\b|\bphone\b|\bemail\b|\btalk to\b|\bnumber\b/i,
+    a: 'You can reach us by phone at 91 234 56 78 or by email at ola@mariabonita.pt.' },
+  { test: /\bparking\b/i,
+    a: 'The Benfica area has street parking nearby; we don\'t have a dedicated car park.' },
+  { test: /\bwifi\b|\binternet\b/i,
+    a: 'Yes, we have free wifi available for clients while they wait or are being attended to.' },
+  { test: /\bchild(ren)?\b|\bkid(s)?\b|\bbaby\b|\bminimum age\b/i,
+    a: 'You\'re welcome to bring your children, but for everyone\'s safety and comfort we ask that they stay accompanied during the treatment. Some services (like colouring) may have a recommended minimum age — ask us when booking.' },
+  { test: /\bfirst time\b|\bfirst visit\b|\bnew client\b|\bwhat to bring\b/i,
+    a: 'On first visits we always do a quick consultation (of your hair or skin, depending on the service) before starting, at no extra cost. You don\'t need to bring anything, just arrive a little before your appointment.' },
+  { test: /\bpromo(tion)?\b|\bdiscount\b|\bvoucher(s)?\b|\bgift card\b|\bloyalty\b/i,
+    a: 'We occasionally run seasonal promotions, and also sell gift vouchers. The best way not to miss news is to follow us on social media or ask directly at the salon.' },
+  { test: /\bproduct(s)?\b|\bbrand(s)?\b/i,
+    a: 'We work with top professional brands, both for hair and skincare — the team can point you to the exact brands in person.' },
+  { test: /\bhygiene\b|\bsterile\b|\bsterilized\b|\bclean\b|\bsafety\b/i,
+    a: 'We follow strict hygiene rules: sterilised or disposable tools, and careful cleaning between every client.' },
+  { test: /\bsmok(e|ing)\b/i,
+    a: 'The salon is a completely smoke-free space.' },
+  { test: /\bpet(s)?\b|\bdog(s)?\b|\bcat(s)?\b/i,
+    a: 'As a rule, pets aren\'t allowed inside the salon, except for assistance dogs.' },
+  { test: /\blanguage(s)?\b|\bspeak english\b|\bdo you speak\b/i,
+    a: 'The team speaks Portuguese and English — feel free to communicate in either.' },
+  { test: /\bthank(s| you)?\b/i,
+    a: 'You\'re welcome! 😊 I\'m here if you need anything else.' },
+  { test: /\bbye\b|\bgoodbye\b|\bsee you\b/i,
+    a: 'See you soon! 👋 Come back anytime you need.' },
+  { test: /\bhi\b|\bhello\b|\bhey\b|\bgood (morning|afternoon|evening)\b/i,
+    a: 'Hi! How can I help — hours, prices, bookings, or another question about the salon?' }
 ];
+
+// Deteta se a pergunta foi escrita em português ou inglês, para o bot
+// responder sempre no idioma em que a pessoa está a falar — independente
+// do botão PT/EN do site (esse só controla o resto da página).
+function detectQueryLang(text){
+  const t = ' ' + text.toLowerCase() + ' ';
+  const hasAccents = /[áàâãéêíóôõúç]/.test(t);
+  const ptWords = /\b(como|quando|qual|quais|quanto|quanta|quantos|quantas|quero|posso|voc[êe]|pre[çc]o|marcar|marca[çc][ãa]o|marca[çc][õo]es|obrigad[oa]|tamb[ée]m|n[ãa]o|est[áa]|s[ãa]o|para|com|uma|isso|aqui|hoje|amanh[ãa]|onde|fica|abrem|fecham|hor[áa]rio|voces|cliente)\b/.test(t);
+  const enWords = /\b(the|is|are|can|how|what|when|where|do|does|you|please|book|price|hour|hours|thanks|thank|hi|hello|open|close|closed|need|want|would|could|my|have)\b/.test(t);
+  const ptScore = (hasAccents ? 1 : 0) + (ptWords ? 1 : 0);
+  const enScore = enWords ? 1 : 0;
+  if(ptScore > enScore) return 'pt';
+  if(enScore > ptScore) return 'en';
+  return null; // ambíguo — usa o idioma do site como reserva
+}
 
 function scrollToBooking(){ document.getElementById('marcacoes').scrollIntoView({behavior:'smooth'}); }
 
 function handleQuery(raw){
   addMsg(raw, 'user');
-  const faq = currentLang === 'en' ? faqEn : faqPt;
-  const fallback = currentLang === 'en' ? FALLBACK_EN : FALLBACK_PT;
+  const lang = detectQueryLang(raw) || currentLang;
+  const faq = lang === 'en' ? faqEn : faqPt;
+  const fallback = lang === 'en' ? FALLBACK_EN : FALLBACK_PT;
   const match = faq.find(f => f.test.test(raw));
   const reply = match ? match.a : fallback;
   setTimeout(() => {
