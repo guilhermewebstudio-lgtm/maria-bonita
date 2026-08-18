@@ -658,12 +658,12 @@
     section{padding:80px 0;}
     .container{padding:0 22px;}
     header{padding:14px 20px;}
-    header.scrolled{padding:10px 20px;}
-    .nav-links{position:fixed; top:0; right:-100%; bottom:0; width:80%; max-width:320px;
+    header.scrolled{padding:10px 20px; background:rgba(247,240,230,0.99); backdrop-filter:none; -webkit-backdrop-filter:none;}
+    .nav-links{position:fixed; top:0; right:-100%; bottom:0; height:100vh; height:100dvh; width:80%; max-width:320px;
       background:var(--bordeaux-deep); flex-direction:column; align-items:flex-start; padding:26px 32px 40px;
       gap:22px; transition:right .4s ease; z-index:199; overflow-y:auto;}
     .nav-links.open{right:0;}
-    .nav-links a, header.scrolled .nav-links a{color:var(--cream) !important; font-size:0.95rem;}
+    .nav-links a{color:var(--cream) !important; font-size:0.95rem;}
     .nav-links .nav-cta{margin-top:6px;}
     .nav-close{display:flex; align-items:center; justify-content:center; width:38px; height:38px; margin:0 0 14px auto; border-radius:50%; background:rgba(255,255,255,0.08);}
     .nav-close:hover{background:rgba(255,255,255,0.16);}
