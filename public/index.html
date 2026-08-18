@@ -146,8 +146,22 @@
   .lang-opt{opacity:0.5; transition:.2s;}
   .lang-opt.active{opacity:1; color:var(--gold);}
   .lang-sep{opacity:0.3; font-size:0.7rem;}
-  .burger{display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:10px; margin:-10px;}
-  .burger span{width:24px; height:2px; background:var(--cream); transition:.3s;}
+  .burger{display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:10px; margin:-10px; z-index:201; position:relative;}
+  .burger span{width:24px; height:2px; background:var(--cream); transition:.3s; transform-origin:center;}
+  header.scrolled .burger span{background:var(--bordeaux);}
+  .burger.open span{background:var(--cream) !important;}
+  .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+  .burger.open span:nth-child(2){opacity:0;}
+  .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+  .nav-overlay{
+    display:none; position:fixed; inset:0; z-index:198;
+    background:rgba(36,16,18,0.55); backdrop-filter:blur(2px);
+  }
+  .nav-overlay.open{display:block;}
+  .nav-close{
+    display:none; align-self:flex-end; background:none; border:none; color:var(--cream);
+    font-size:1.3rem; cursor:pointer; padding:8px; margin:-8px -8px 20px 0;
+  }
 
   /* HERO */
   .hero{
@@ -619,11 +633,13 @@
     header{padding:14px 20px;}
     header.scrolled{padding:10px 20px;}
     .nav-links{position:fixed; top:0; right:-100%; bottom:0; width:80%; max-width:320px;
-      background:var(--bordeaux-deep); flex-direction:column; align-items:flex-start; padding:100px 32px 40px;
+      background:var(--bordeaux-deep); flex-direction:column; align-items:flex-start; padding:26px 32px 40px;
       gap:22px; transition:right .4s ease; z-index:199; overflow-y:auto;}
     .nav-links.open{right:0;}
     .nav-links a, header.scrolled .nav-links a{color:var(--cream) !important; font-size:0.95rem;}
     .nav-links .nav-cta{margin-top:6px;}
+    .nav-close{display:flex; align-items:center; justify-content:center; width:38px; height:38px; margin:0 0 14px auto; border-radius:50%; background:rgba(255,255,255,0.08);}
+    .nav-close:hover{background:rgba(255,255,255,0.16);}
     .burger{display:flex;}
     nav{gap:16px;}
     .icon-btn span{display:none;}
@@ -744,7 +760,9 @@
     Maria Bonita
   </a>
   <nav>
+    <div class="nav-overlay" id="navOverlay"></div>
     <div class="nav-links" id="navLinks">
+      <button class="nav-close" id="navClose" aria-label="Fechar menu">✕</button>
       <a href="#servicos" data-i18n="nav_services">Serviços</a>
       <a href="#precos" data-i18n="nav_prices">Preços</a>
       <a href="#sobre" data-i18n="nav_about">Sobre</a>
@@ -1544,8 +1562,28 @@ window.addEventListener('scroll', () => header.classList.toggle('scrolled', wind
 
 const burger = document.getElementById('burger');
 const navLinks = document.getElementById('navLinks');
-burger.addEventListener('click', () => navLinks.classList.toggle('open'));
-navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+const navOverlay = document.getElementById('navOverlay');
+const navClose = document.getElementById('navClose');
+
+function openNav(){
+  navLinks.classList.add('open');
+  navOverlay.classList.add('open');
+  burger.classList.add('open');
+  burger.setAttribute('aria-label', 'Fechar menu');
+}
+function closeNav(){
+  navLinks.classList.remove('open');
+  navOverlay.classList.remove('open');
+  burger.classList.remove('open');
+  burger.setAttribute('aria-label', 'Abrir menu');
+}
+burger.addEventListener('click', () => {
+  if(navLinks.classList.contains('open')) closeNav(); else openNav();
+});
+navOverlay.addEventListener('click', closeNav);
+navClose.addEventListener('click', closeNav);
+navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav));
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeNav(); });
 
 /* ============ MODAL HELPERS ============ */
 function switchAuthTab(tab){
