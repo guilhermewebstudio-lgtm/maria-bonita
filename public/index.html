@@ -308,6 +308,40 @@
   .field small.err{color:#b0392f; font-size:0.76rem; display:none; margin-top:6px;}
   .field.invalid input, .field.invalid select{border-color:#b0392f;}
   .field.invalid small.err{display:block;}
+
+  /* BOOKING WIZARD ELEMENTS */
+  .visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+  .step-label{
+    display:flex; align-items:center; gap:10px; font-size:0.78rem; text-transform:uppercase;
+    letter-spacing:0.1em; color:var(--bordeaux); font-weight:600; margin:26px 0 14px;
+  }
+  .step-label:first-of-type{margin-top:0;}
+  .step-num{
+    width:22px; height:22px; border-radius:50%; background:var(--bordeaux); color:var(--cream);
+    display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-family:'Playfair Display', serif;
+    flex-shrink:0;
+  }
+  .service-picker{display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:6px;}
+  .svc-chip{
+    display:flex; align-items:center; gap:9px; padding:12px 14px; border:1px solid #ddccb8; border-radius:6px;
+    background:#fdfaf5; cursor:pointer; font-family:'Jost'; font-size:0.86rem; color:var(--ink);
+    transition:.2s ease; text-align:left;
+  }
+  .svc-chip svg{width:18px; height:18px; color:var(--rose); flex-shrink:0;}
+  .svc-chip:hover{border-color:var(--gold); background:#fbf6ec;}
+  .svc-chip.active{
+    background:var(--bordeaux); border-color:var(--bordeaux); color:var(--cream);
+  }
+  .svc-chip.active svg{color:var(--gold-light);}
+  #err-service{color:#b0392f; font-size:0.76rem; display:none; margin:2px 0 4px;}
+  #err-service.show{display:block;}
+  .time-picker{display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;}
+  .time-chip{
+    padding:9px 4px; border:1px solid #ddccb8; border-radius:5px; background:#fdfaf5;
+    font-family:'Jost'; font-size:0.82rem; color:var(--ink); cursor:pointer; text-align:center; transition:.2s ease;
+  }
+  .time-chip:hover{border-color:var(--gold);}
+  .time-chip.active{background:var(--bordeaux); border-color:var(--bordeaux); color:var(--cream);}
   .submit-btn{
     width:100%; padding:16px; background:var(--bordeaux); color:var(--cream);
     border:none; border-radius:2px; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.12em;
@@ -331,6 +365,13 @@
     padding:32px; border-radius:3px;
   }
   .t-stars{color:var(--gold); font-size:0.9rem; letter-spacing:2px; margin-bottom:16px;}
+  .t-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .t-avatar{
+    width:36px; height:36px; border-radius:50%; background:linear-gradient(150deg, var(--gold), var(--gold-light));
+    color:var(--bordeaux-deep); display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display', serif; font-weight:700; font-size:0.85rem;
+  }
+  .t-top .t-stars{margin-bottom:0;}
   .t-card p{font-size:0.95rem; color:rgba(247,240,230,0.85); margin-bottom:20px; font-style:italic;}
   .t-name{font-size:0.85rem; color:var(--gold-light); font-weight:500;}
 
@@ -492,6 +533,30 @@
   a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
     outline:2px solid var(--gold); outline-offset:2px;
   }
+
+  /* SCROLL REVEAL */
+  [data-reveal]{opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease;}
+  [data-reveal].revealed{opacity:1; transform:translateY(0);}
+  [data-reveal="stagger"] > *{opacity:0; transform:translateY(20px); transition:opacity .6s ease, transform .6s ease;}
+  [data-reveal="stagger"].revealed > *{opacity:1; transform:translateY(0);}
+  [data-reveal="stagger"].revealed > *:nth-child(1){transition-delay:.05s;}
+  [data-reveal="stagger"].revealed > *:nth-child(2){transition-delay:.12s;}
+  [data-reveal="stagger"].revealed > *:nth-child(3){transition-delay:.19s;}
+  [data-reveal="stagger"].revealed > *:nth-child(4){transition-delay:.26s;}
+  [data-reveal="stagger"].revealed > *:nth-child(5){transition-delay:.33s;}
+  [data-reveal="stagger"].revealed > *:nth-child(6){transition-delay:.4s;}
+  @media (prefers-reduced-motion: reduce){
+    [data-reveal], [data-reveal="stagger"] > *{opacity:1 !important; transform:none !important; transition:none !important;}
+  }
+
+  /* SECTION DIVIDER */
+  .divider{display:flex; align-items:center; justify-content:center; gap:14px; padding:0; height:0; position:relative; z-index:3;}
+  .divider-mark{
+    width:52px; height:52px; border-radius:50%; background:var(--cream); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; margin:0 auto; transform:translateY(-26px);
+    box-shadow:0 10px 24px rgba(52,9,15,0.1);
+  }
+  .divider-mark svg{width:20px; height:20px; color:var(--gold);}
 </style>
 </head>
 <body>
@@ -546,13 +611,13 @@
 
 <section class="services" id="servicos">
   <div class="container">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
       <div class="eyebrow">O que fazemos</div>
       <h2>Serviços à medida</h2>
       <p>Da manutenção mensal ao momento especial — escolha o que precisa e marque em menos de um minuto.</p>
     </div>
   </div>
-  <div class="service-grid">
+  <div class="service-grid" data-reveal="stagger">
     <div class="service-card">
       <div class="thumb"><img src="https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?auto=format&fit=crop&w=700&q=70" alt="Cliente a cortar o cabelo num salão" loading="lazy"></div>
       <div class="body">
@@ -612,12 +677,12 @@
 
 <section class="pricing" id="precos">
   <div class="container">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
       <div class="eyebrow">Tabela de preços</div>
       <h2>Preços claros, sem surpresas</h2>
       <p>Valores de referência — o preço final depende do comprimento/estado do cabelo ou da complexidade do trabalho, e é sempre confirmado antes do serviço.</p>
     </div>
-    <div class="price-groups">
+    <div class="price-groups" data-reveal="stagger">
       <div class="price-group">
         <h3><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/></svg></span>Cabelo</h3>
         <div class="price-row"><span class="name">Corte feminino<small>Lavagem + corte + escova</small></span><span class="val">Desde 18€</span></div>
@@ -655,12 +720,14 @@
   </div>
 </section>
 
+<div class="divider"><div class="divider-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/></svg></div></div>
+
 <section class="about" id="sobre">
   <div class="container">
-    <div class="about-visual">
+    <div class="about-visual" data-reveal>
       <img src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=900&q=70" alt="Interior de um salão de beleza com cadeiras e espelhos" loading="lazy">
     </div>
-    <div class="about-text">
+    <div class="about-text" data-reveal>
       <div class="eyebrow">A nossa história</div>
       <h2>Um salão de bairro, com padrão de cidade.</h2>
       <p>A Maria Bonita nasceu em Benfica com um propósito simples: tratar cada cliente como se fosse a única do dia. Mais de uma década depois, continuamos fiéis a esse compromisso — agora com uma equipa de especialistas certificados e produtos profissionais de topo.</p>
@@ -673,7 +740,7 @@
   </div>
 </section>
 
-<div class="gallery-strip" id="galeria">
+<div class="gallery-strip" id="galeria" data-reveal="stagger">
   <div data-label="Corte & Cor"><img src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=600&q=70" alt="Secagem e styling de cabelo" loading="lazy"></div>
   <div data-label="Nail Art"><img src="https://images.unsplash.com/photo-1519014816548-bf5fe059798b?auto=format&fit=crop&w=600&q=70" alt="Manicure rosa em foco" loading="lazy"></div>
   <div data-label="Pedicure"><img src="https://images.unsplash.com/photo-1610992015762-45dca7fa3a85?auto=format&fit=crop&w=600&q=70" alt="Pedicure sobre toalha branca" loading="lazy"></div>
@@ -686,7 +753,7 @@
 
 <section class="location">
   <div class="container">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
       <div class="eyebrow">Onde estamos</div>
       <h2>Encontre-nos em Benfica</h2>
       <p>A morada exata e o mapa vão ser adicionados aqui em breve.</p>
@@ -701,10 +768,10 @@
 
 <section class="booking" id="marcacoes">
   <div class="container">
-    <div class="booking-info">
+    <div class="booking-info" data-reveal>
       <div class="eyebrow" style="color:var(--rose);">Marcações</div>
       <h2>Reserve o seu momento</h2>
-      <p>Preencha os seus dados e escolha o serviço — entramos em contacto para confirmar o horário. Também pode marcar diretamente com a nossa assistente virtual.</p>
+      <p>Escolha o serviço, o dia e a hora — entramos em contacto para confirmar. Também pode marcar diretamente com a nossa assistente virtual.</p>
       <div class="info-row">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
         <div><h4>Morada</h4><span>Benfica, Lisboa (morada exata brevemente)</span></div>
@@ -719,30 +786,33 @@
       </div>
     </div>
 
-    <div class="booking-form">
+    <div class="booking-form" data-reveal>
       <div id="formStep">
-        <h3>Formulário de marcação</h3>
+        <h3>Marcação em 3 passos</h3>
         <p>Resposta de confirmação em poucas horas, dentro do nosso horário.</p>
         <div class="logged-banner" id="loggedBanner" style="display:none;">
           <span>A marcar como <strong id="loggedName"></strong></span>
           <button type="button" id="loggedSwitch">não sou eu</button>
         </div>
         <form id="bookingForm" novalidate>
-          <div class="form-row">
-            <div class="field" id="f-name">
-              <label for="fname">Nome</label>
-              <input id="fname" type="text" placeholder="O seu nome">
-              <small class="err">Indique o seu nome.</small>
-            </div>
-            <div class="field" id="f-phone">
-              <label for="fphone">Telemóvel</label>
-              <input id="fphone" type="tel" placeholder="9xx xxx xxx">
-              <small class="err">Indique um telemóvel válido (9 dígitos).</small>
-            </div>
-          </div>
+
+          <div class="step-label"><span class="step-num">1</span>Escolha o serviço</div>
           <div class="field" id="f-service">
-            <label for="fservice">Serviço</label>
-            <select id="fservice">
+            <div class="service-picker" id="servicePicker">
+              <button type="button" class="svc-chip" data-value="Cabelo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2c-1.8 3-4 5-4 8a4 4 0 0 0 8 0c0-3-2.2-5-4-8Z"/></svg>Cabelo</button>
+              <button type="button" class="svc-chip" data-value="Unhas">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Unhas</button>
+              <button type="button" class="svc-chip" data-value="Estética Facial">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>Estética Facial</button>
+              <button type="button" class="svc-chip" data-value="Sobrancelhas & Pestanas">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h16M4 6h16M4 18h16"/></svg>Sobrancelhas</button>
+              <button type="button" class="svc-chip" data-value="Depilação">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3v4M18 3v4M4 11h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-6Z"/></svg>Depilação</button>
+              <button type="button" class="svc-chip" data-value="Noiva & Eventos">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5Z"/></svg>Noiva & Eventos</button>
+            </div>
+            <select id="fservice" class="visually-hidden" tabindex="-1" aria-hidden="true">
               <option value="">Escolha um serviço</option>
               <option>Cabelo</option>
               <option>Unhas</option>
@@ -753,16 +823,31 @@
             </select>
             <small class="err">Escolha um serviço.</small>
           </div>
+
+          <div class="step-label"><span class="step-num">2</span>Escolha o dia e a hora</div>
+          <div class="field" id="f-date">
+            <label for="fdate">Data preferida</label>
+            <input id="fdate" type="date">
+            <small class="err">Escolha uma data a partir de hoje.</small>
+          </div>
+          <div class="field" id="f-time">
+            <label>Hora preferida</label>
+            <div class="time-picker" id="timePicker"></div>
+            <input id="ftime" type="hidden">
+            <small class="err">Escolha uma hora entre as 9h30 e as 19h30.</small>
+          </div>
+
+          <div class="step-label"><span class="step-num">3</span>Os seus dados</div>
           <div class="form-row">
-            <div class="field" id="f-date">
-              <label for="fdate">Data preferida</label>
-              <input id="fdate" type="date">
-              <small class="err">Escolha uma data a partir de hoje.</small>
+            <div class="field" id="f-name">
+              <label for="fname">Nome</label>
+              <input id="fname" type="text" placeholder="O seu nome">
+              <small class="err">Indique o seu nome.</small>
             </div>
-            <div class="field" id="f-time">
-              <label for="ftime">Hora preferida</label>
-              <input id="ftime" type="time">
-              <small class="err">Escolha uma hora entre as 9h30 e as 19h30.</small>
+            <div class="field" id="f-phone">
+              <label for="fphone">Telemóvel</label>
+              <input id="fphone" type="tel" placeholder="9xx xxx xxx">
+              <small class="err">Indique um telemóvel válido (9 dígitos).</small>
             </div>
           </div>
           <div class="field">
@@ -784,17 +869,17 @@
 
 <section class="testimonials">
   <div class="container">
-    <div class="section-head" style="margin-bottom:44px;">
+    <div class="section-head" style="margin-bottom:44px;" data-reveal>
       <div class="eyebrow" style="color:var(--gold-light);">Clientes</div>
       <h2 style="color:var(--cream);">O que dizem de nós</h2>
     </div>
   </div>
   <div class="container">
-    <div class="t-track">
-      <div class="t-card"><div class="t-stars">★★★★★</div><p>"Sou cliente há 6 anos e nunca saí de lá insatisfeita. Ambiente acolhedor e equipa atenciosa."</p><div class="t-name">— Sofia M.</div></div>
-      <div class="t-card"><div class="t-stars">★★★★★</div><p>"O melhor serviço de unhas de Benfica, sem dúvida. Marquei pelo site e foi super rápido."</p><div class="t-name">— Carla R.</div></div>
-      <div class="t-card"><div class="t-stars">★★★★★</div><p>"Fiz o cabelo para o meu casamento e foi exatamente o que sonhei. Recomendo de olhos fechados."</p><div class="t-name">— Beatriz A.</div></div>
-      <div class="t-card"><div class="t-stars">★★★★★</div><p>"Profissionais, pontuais e com preços justos. É o meu salão de referência."</p><div class="t-name">— Inês P.</div></div>
+    <div class="t-track" data-reveal="stagger">
+      <div class="t-card"><div class="t-top"><div class="t-avatar">SM</div><div class="t-stars">★★★★★</div></div><p>"Sou cliente há 6 anos e nunca saí de lá insatisfeita. Ambiente acolhedor e equipa atenciosa."</p><div class="t-name">Sofia M.</div></div>
+      <div class="t-card"><div class="t-top"><div class="t-avatar">CR</div><div class="t-stars">★★★★★</div></div><p>"O melhor serviço de unhas de Benfica, sem dúvida. Marquei pelo site e foi super rápido."</p><div class="t-name">Carla R.</div></div>
+      <div class="t-card"><div class="t-top"><div class="t-avatar">BA</div><div class="t-stars">★★★★★</div></div><p>"Fiz o cabelo para o meu casamento e foi exatamente o que sonhei. Recomendo de olhos fechados."</p><div class="t-name">Beatriz A.</div></div>
+      <div class="t-card"><div class="t-top"><div class="t-avatar">IP</div><div class="t-stars">★★★★★</div></div><p>"Profissionais, pontuais e com preços justos. É o meu salão de referência."</p><div class="t-name">Inês P.</div></div>
     </div>
   </div>
 </section>
@@ -1293,6 +1378,8 @@ document.getElementById('newBookingBtn').addEventListener('click', () => {
   form.reset();
   ['f-name','f-phone','f-service','f-date','f-time'].forEach(id => setInvalid(id, false));
   document.getElementById('fdate').min = new Date().toISOString().slice(0,10);
+  if(servicePicker) servicePicker.querySelectorAll('.svc-chip').forEach(c => c.classList.remove('active'));
+  if(timePicker) timePicker.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
   if(currentUserData){
     document.getElementById('fname').value = currentUserData.name;
     document.getElementById('fphone').value = currentUserData.phone;
@@ -1385,6 +1472,55 @@ chatSuggestions.addEventListener('click', (e) => {
   const map = { horario:'Qual o horário?', precos:'Quais os preços?', marcar:'Quero marcar', cancelar:'Como cancelo uma marcação?', pagamento:'Que formas de pagamento aceitam?' };
   handleQuery(map[chip.dataset.q]);
 });
+
+/* ============ SCROLL REVEAL ============ */
+const revealEls = document.querySelectorAll('[data-reveal]');
+if('IntersectionObserver' in window && revealEls.length){
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('revealed');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+  revealEls.forEach(el => revealObserver.observe(el));
+} else {
+  revealEls.forEach(el => el.classList.add('revealed'));
+}
+
+/* ============ BOOKING WIZARD: service chips + time slots ============ */
+const servicePicker = document.getElementById('servicePicker');
+const fserviceSelect = document.getElementById('fservice');
+if(servicePicker){
+  servicePicker.querySelectorAll('.svc-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      servicePicker.querySelectorAll('.svc-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      fserviceSelect.value = chip.dataset.value;
+      document.getElementById('f-service').classList.remove('invalid');
+    });
+  });
+}
+
+const timePicker = document.getElementById('timePicker');
+const ftimeInput = document.getElementById('ftime');
+if(timePicker){
+  const slots = ['09:30','10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30'];
+  slots.forEach(slot => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'time-chip';
+    btn.textContent = slot;
+    btn.addEventListener('click', () => {
+      timePicker.querySelectorAll('.time-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      ftimeInput.value = slot;
+      document.getElementById('f-time').classList.remove('invalid');
+    });
+    timePicker.appendChild(btn);
+  });
+}
 
 /* init */
 (async function init(){
