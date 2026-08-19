@@ -1730,6 +1730,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     currentUserData = { id: data.id, name: data.name, email: data.email, phone: data.phone, is_admin: !!data.is_admin };
     closeModals();
     refreshAccountUI();
+    resetBookingForm();
     document.getElementById('loginForm').reset();
     document.getElementById('loginMsg').className = 'modal-msg';
   }catch(err){
@@ -1751,6 +1752,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     currentUserData = { id: data.id, name: data.name, email: data.email, phone: data.phone, is_admin: !!data.is_admin };
     closeModals();
     refreshAccountUI();
+    resetBookingForm();
     document.getElementById('signupForm').reset();
     document.getElementById('signupMsg').className = 'modal-msg';
   }catch(err){
@@ -1803,6 +1805,7 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   localStorage.removeItem('mb_token');
   closeDrawer();
   refreshAccountUI();
+  resetBookingForm();
 });
 
 function refreshAccountUI(){
@@ -2086,7 +2089,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-document.getElementById('newBookingBtn').addEventListener('click', () => {
+function resetBookingForm(){
   form.reset();
   ['f-name','f-phone','f-service','f-date','f-time'].forEach(id => setInvalid(id, false));
   document.getElementById('fdate').min = new Date().toISOString().slice(0,10);
@@ -2098,7 +2101,9 @@ document.getElementById('newBookingBtn').addEventListener('click', () => {
   }
   formStep.style.display = 'block';
   formConfirm.classList.remove('show');
-});
+}
+
+document.getElementById('newBookingBtn').addEventListener('click', resetBookingForm);
 
 /* ============ CHATBOT ============ */
 const chatToggle = document.getElementById('chatToggle');
