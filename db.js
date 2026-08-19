@@ -1,68 +1,89 @@
-// Base de dados real em ficheiro (SQLite). Fica gravada em disco em "data.db"
-// ao lado deste ficheiro — os dados sobrevivem a reinícios do servidor
-// (desde que o alojamento tenha disco persistente — ver nota no fim deste ficheiro).
-const Database = require('better-sqlite3');
-const path = require('path');
+// Base de dados real usando PostgreSQL. Ao contrário de um ficheiro local,
+// uma base de dados alojada (Neon, Supabase, Render Postgres, etc.) nunca
+// se perde quando o servidor reinicia ou é reimplantado — vive à parte.
+//
+// Precisa de uma variável de ambiente DATABASE_URL com a "connection string"
+// que o serviço de base de dados te dá (ver .env.example e COMO-POR-ONLINE.md).
+const { Pool } = require('pg');
 
-const db = new Database(path.join(__dirname, 'data.db'));
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    phone TEXT NOT NULL,
-    password_hash TEXT NOT NULL,
-    is_admin INTEGER NOT NULL DEFAULT 0,
-    reset_token TEXT,
-    reset_token_expires TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+if (!process.env.DATABASE_URL) {
+  console.error(
+    'Falta a variável de ambiente DATABASE_URL. Cria uma base de dados Postgres ' +
+    'gratuita (ex: neon.tech) e cola a connection string nas Environment Variables.'
   );
+}
 
-  CREATE TABLE IF NOT EXISTS bookings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    service TEXT NOT NULL,
-    date TEXT NOT NULL,
-    time TEXT NOT NULL,
-    notes TEXT,
-    status TEXT NOT NULL DEFAULT 'pendente',
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-`);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost')
+    ? false
+    : { rejectUnauthorized: false },
+});
 
-// Migração suave: se a base de dados já existir de uma versão anterior
-// (sem a coluna is_admin), acrescenta-a sem apagar nada.
-try {
-  db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0');
-} catch (e) {
-  // já existe — ignora
+async function query(text, params) {
+  return pool.query(text, params);
+}
+
+async function init() {
+  await query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      phone TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
+      is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+      reset_token TEXT,
+      reset_token_expires TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS bookings (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      service TEXT NOT NULL,
+      date TEXT NOT NULL,
+      time TEXT NOT NULL,
+      notes TEXT,
+      status TEXT NOT NULL DEFAULT 'pendente',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  // Migração suave: se a tabela já existir de uma versão anterior sem
+  // is_admin, acrescenta a coluna sem apagar nada.
+  await query(`
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
 }
 
 // Cria (ou promove) a conta da administradora (Maria Bonita) a partir de
 // variáveis de ambiente, para não ser preciso mexer em código nem na base
 // de dados diretamente. Ver ADMIN_EMAIL / ADMIN_PASSWORD no .env.example.
-function ensureAdminAccount(bcrypt) {
+async function ensureAdminAccount(bcrypt) {
   const email = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
   const password = process.env.ADMIN_PASSWORD || '';
   if (!email || !password) return;
 
-  const existing = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const { rows } = await query('SELECT * FROM users WHERE email = $1', [email]);
+  const existing = rows[0];
+
   if (existing) {
     if (!existing.is_admin) {
-      db.prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(existing.id);
+      await query('UPDATE users SET is_admin = TRUE WHERE id = $1', [existing.id]);
       console.log(`Conta ${email} promovida a administradora.`);
     }
     return;
   }
+
   const hash = bcrypt.hashSync(password, 10);
-  db.prepare(
-    'INSERT INTO users (name, email, phone, password_hash, is_admin) VALUES (?, ?, ?, ?, 1)'
-  ).run('Maria Bonita', email, '910000000', hash);
+  await query(
+    'INSERT INTO users (name, email, phone, password_hash, is_admin) VALUES ($1, $2, $3, $4, TRUE)',
+    ['Maria Bonita', email, '910000000', hash]
+  );
   console.log(`Conta de administradora criada: ${email}`);
 }
 
-module.exports = db;
-module.exports.ensureAdminAccount = ensureAdminAccount;
+module.exports = { query, init, ensureAdminAccount, pool };

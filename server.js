@@ -18,10 +18,6 @@ app.use(express.static(require('path').join(__dirname, 'public')));
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-muda-isto';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5500';
 
-// Cria/promove a conta da Maria Bonita se ADMIN_EMAIL e ADMIN_PASSWORD
-// estiverem definidos nas variáveis de ambiente.
-db.ensureAdminAccount(bcrypt);
-
 /* ---------------------------------------------------------------- */
 /* Utilitários                                                       */
 /* ---------------------------------------------------------------- */
@@ -49,8 +45,9 @@ function auth(req, res, next) {
 }
 
 // Só deixa passar se o utilizador autenticado for a administradora (Maria Bonita).
-function requireAdmin(req, res, next) {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.userId);
+async function requireAdmin(req, res, next) {
+  const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [req.userId]);
+  const user = rows[0];
   if (!user || !user.is_admin) return res.status(403).json({ message: 'Acesso restrito à Maria Bonita.' });
   next();
 }
@@ -59,11 +56,20 @@ function isValidPhone(phone) {
   return /^9\d{8}$/.test(String(phone).replace(/\s/g, ''));
 }
 
+// Envolve rotas assíncronas para os erros caírem sempre num JSON decente
+// em vez de rebentar o servidor sem resposta.
+function h(fn) {
+  return (req, res) => fn(req, res).catch((err) => {
+    console.error(err);
+    res.status(500).json({ message: 'Erro interno do servidor. Tente novamente.' });
+  });
+}
+
 /* ---------------------------------------------------------------- */
 /* AUTENTICAÇÃO                                                      */
 /* ---------------------------------------------------------------- */
 
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', h(async (req, res) => {
   const { name, email, phone, password } = req.body || {};
 
   if (!name || String(name).trim().length < 2)
@@ -76,48 +82,54 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(400).json({ message: 'A password deve ter pelo menos 6 caracteres.' });
 
   const emailNorm = email.trim().toLowerCase();
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(emailNorm);
-  if (existing) return res.status(409).json({ message: 'Já existe uma conta com este email.' });
+  const existing = await db.query('SELECT id FROM users WHERE email = $1', [emailNorm]);
+  if (existing.rows[0]) return res.status(409).json({ message: 'Já existe uma conta com este email.' });
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const info = db.prepare(
-    'INSERT INTO users (name, email, phone, password_hash) VALUES (?, ?, ?, ?)'
-  ).run(name.trim(), emailNorm, phone.trim(), passwordHash);
+  const inserted = await db.query(
+    'INSERT INTO users (name, email, phone, password_hash) VALUES ($1, $2, $3, $4) RETURNING *',
+    [name.trim(), emailNorm, phone.trim(), passwordHash]
+  );
+  const user = inserted.rows[0];
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
   res.status(201).json({ token: makeToken(user), ...publicUser(user) });
-});
+}));
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', h(async (req, res) => {
   const { email, password } = req.body || {};
   const emailNorm = String(email || '').trim().toLowerCase();
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(emailNorm);
+  const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [emailNorm]);
+  const user = rows[0];
   if (!user) return res.status(401).json({ message: 'Email ou password incorretos.' });
 
   const ok = await bcrypt.compare(password || '', user.password_hash);
   if (!ok) return res.status(401).json({ message: 'Email ou password incorretos.' });
 
   res.json({ token: makeToken(user), ...publicUser(user) });
-});
+}));
 
-app.get('/api/auth/me', auth, (req, res) => {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.userId);
+app.get('/api/auth/me', auth, h(async (req, res) => {
+  const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [req.userId]);
+  const user = rows[0];
   if (!user) return res.status(404).json({ message: 'Utilizador não encontrado.' });
   res.json(publicUser(user));
-});
+}));
 
-app.post('/api/auth/forgot-password', async (req, res) => {
+app.post('/api/auth/forgot-password', h(async (req, res) => {
   const emailNorm = String(req.body?.email || '').trim().toLowerCase();
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(emailNorm);
+  const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [emailNorm]);
+  const user = rows[0];
 
   // Responde sempre da mesma forma, mesmo que o email não exista — evita
   // que alguém use isto para descobrir quais emails têm conta.
   if (user) {
     const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hora
-    db.prepare('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?')
-      .run(token, expires, user.id);
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+    await db.query(
+      'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE id = $3',
+      [token, expires, user.id]
+    );
 
     const resetLink = `${FRONTEND_URL}/reset-password.html?token=${token}`;
     await sendEmail(
@@ -130,23 +142,26 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   }
 
   res.json({ message: 'Se existir uma conta com este email, foi enviado um email de recuperação.' });
-});
+}));
 
-app.post('/api/auth/reset-password', async (req, res) => {
+app.post('/api/auth/reset-password', h(async (req, res) => {
   const { token, newPassword } = req.body || {};
   if (!token || !newPassword || newPassword.length < 6)
     return res.status(400).json({ message: 'Pedido inválido.' });
 
-  const user = db.prepare('SELECT * FROM users WHERE reset_token = ?').get(token);
+  const { rows } = await db.query('SELECT * FROM users WHERE reset_token = $1', [token]);
+  const user = rows[0];
   if (!user || !user.reset_token_expires || new Date(user.reset_token_expires) < new Date())
     return res.status(400).json({ message: 'Token inválido ou expirado. Peça uma nova recuperação de password.' });
 
   const passwordHash = await bcrypt.hash(newPassword, 10);
-  db.prepare('UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?')
-    .run(passwordHash, user.id);
+  await db.query(
+    'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
+    [passwordHash, user.id]
+  );
 
   res.json({ message: 'Password alterada com sucesso. Já pode entrar.' });
-});
+}));
 
 /* ---------------------------------------------------------------- */
 /* MARCAÇÕES                                                         */
@@ -156,7 +171,7 @@ const VALID_SERVICES = [
   'Cabelo', 'Unhas', 'Estética Facial', 'Sobrancelhas & Pestanas', 'Depilação', 'Noiva & Eventos'
 ];
 
-app.post('/api/bookings', auth, (req, res) => {
+app.post('/api/bookings', auth, h(async (req, res) => {
   const { service, date, time, notes } = req.body || {};
 
   if (!VALID_SERVICES.includes(service))
@@ -171,32 +186,36 @@ app.post('/api/bookings', auth, (req, res) => {
 
   // Toda a marcação nova nasce "pendente" — só fica confirmada quando a
   // Maria Bonita a aceitar na área dela.
-  const info = db.prepare(
-    'INSERT INTO bookings (user_id, service, date, time, notes, status) VALUES (?, ?, ?, ?, ?, ?)'
-  ).run(req.userId, service, date, time, notes || null, 'pendente');
+  const inserted = await db.query(
+    'INSERT INTO bookings (user_id, service, date, time, notes, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+    [req.userId, service, date, time, notes || null, 'pendente']
+  );
 
-  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(info.lastInsertRowid);
-  res.status(201).json(booking);
-});
+  res.status(201).json(inserted.rows[0]);
+}));
 
-app.get('/api/bookings', auth, (req, res) => {
-  const bookings = db.prepare(
-    'SELECT * FROM bookings WHERE user_id = ? ORDER BY date DESC, time DESC'
-  ).all(req.userId);
-  res.json(bookings);
-});
+app.get('/api/bookings', auth, h(async (req, res) => {
+  const { rows } = await db.query(
+    'SELECT * FROM bookings WHERE user_id = $1 ORDER BY date DESC, time DESC',
+    [req.userId]
+  );
+  res.json(rows);
+}));
 
-app.post('/api/bookings/:id/cancel', auth, (req, res) => {
-  const booking = db.prepare('SELECT * FROM bookings WHERE id = ? AND user_id = ?')
-    .get(req.params.id, req.userId);
+app.post('/api/bookings/:id/cancel', auth, h(async (req, res) => {
+  const { rows } = await db.query(
+    'SELECT * FROM bookings WHERE id = $1 AND user_id = $2',
+    [req.params.id, req.userId]
+  );
+  const booking = rows[0];
 
   if (!booking) return res.status(404).json({ message: 'Marcação não encontrada.' });
   if (booking.status !== 'confirmada' && booking.status !== 'pendente')
     return res.status(400).json({ message: 'Esta marcação já não pode ser cancelada.' });
 
-  db.prepare('UPDATE bookings SET status = ? WHERE id = ?').run('cancelada', booking.id);
+  await db.query('UPDATE bookings SET status = $1 WHERE id = $2', ['cancelada', booking.id]);
   res.json({ message: 'Marcação cancelada.' });
-});
+}));
 
 /* ---------------------------------------------------------------- */
 /* ÁREA DA MARIA BONITA (administração)                              */
@@ -204,45 +223,60 @@ app.post('/api/bookings/:id/cancel', auth, (req, res) => {
 
 // Lista todas as marcações de todos os clientes, com o nome/contacto de
 // cada um, para a Maria Bonita gerir a agenda toda num único sítio.
-app.get('/api/admin/bookings', auth, requireAdmin, (req, res) => {
-  const bookings = db.prepare(`
+app.get('/api/admin/bookings', auth, requireAdmin, h(async (req, res) => {
+  const { rows } = await db.query(`
     SELECT b.*, u.name AS client_name, u.phone AS client_phone, u.email AS client_email
     FROM bookings b
     JOIN users u ON u.id = b.user_id
     ORDER BY b.date ASC, b.time ASC
-  `).all();
-  res.json(bookings);
-});
+  `);
+  res.json(rows);
+}));
 
-app.post('/api/admin/bookings/:id/accept', auth, requireAdmin, (req, res) => {
-  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+app.post('/api/admin/bookings/:id/accept', auth, requireAdmin, h(async (req, res) => {
+  const { rows } = await db.query('SELECT * FROM bookings WHERE id = $1', [req.params.id]);
+  const booking = rows[0];
   if (!booking) return res.status(404).json({ message: 'Marcação não encontrada.' });
 
-  db.prepare('UPDATE bookings SET status = ? WHERE id = ?').run('confirmada', booking.id);
+  await db.query('UPDATE bookings SET status = $1 WHERE id = $2', ['confirmada', booking.id]);
   res.json({ message: 'Marcação aceite.' });
-});
+}));
 
-app.post('/api/admin/bookings/:id/cancel', auth, requireAdmin, (req, res) => {
-  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+app.post('/api/admin/bookings/:id/cancel', auth, requireAdmin, h(async (req, res) => {
+  const { rows } = await db.query('SELECT * FROM bookings WHERE id = $1', [req.params.id]);
+  const booking = rows[0];
   if (!booking) return res.status(404).json({ message: 'Marcação não encontrada.' });
 
-  db.prepare('UPDATE bookings SET status = ? WHERE id = ?').run('cancelada', booking.id);
+  await db.query('UPDATE bookings SET status = $1 WHERE id = $2', ['cancelada', booking.id]);
   res.json({ message: 'Marcação cancelada.' });
-});
+}));
 
 // Apagar remove mesmo a marcação da base de dados — desaparece por
 // completo (diferente de cancelar, que fica visível no histórico).
-app.delete('/api/admin/bookings/:id', auth, requireAdmin, (req, res) => {
-  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+app.delete('/api/admin/bookings/:id', auth, requireAdmin, h(async (req, res) => {
+  const { rows } = await db.query('SELECT * FROM bookings WHERE id = $1', [req.params.id]);
+  const booking = rows[0];
   if (!booking) return res.status(404).json({ message: 'Marcação não encontrada.' });
 
-  db.prepare('DELETE FROM bookings WHERE id = ?').run(booking.id);
+  await db.query('DELETE FROM bookings WHERE id = $1', [booking.id]);
   res.json({ message: 'Marcação apagada.' });
-});
+}));
 
 /* ---------------------------------------------------------------- */
 
 app.get('/api/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`API da Maria Bonita a correr em http://localhost:${PORT}`));
+
+// Prepara a base de dados (tabelas + conta da administradora) e só depois
+// começa a aceitar pedidos.
+(async () => {
+  try {
+    await db.init();
+    await db.ensureAdminAccount(bcrypt);
+    app.listen(PORT, () => console.log(`API da Maria Bonita a correr em http://localhost:${PORT}`));
+  } catch (err) {
+    console.error('Falha ao arrancar o servidor:', err);
+    process.exit(1);
+  }
+})();
